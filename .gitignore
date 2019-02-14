@@ -10,3 +10,5 @@ nbproject/
 # Prevent the blobs and vars directories from being added ever
 /blobs/*
 /vars/*
+blobs
+vars
