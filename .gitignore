@@ -1,0 +1,12 @@
+# Ingore project settings from PhpStorm
+.idea/
+
+# Ignore project settings from NetBeans
+nbproject/
+
+# Ignore swapfiles from vi
+*.swp
+
+# Prevent the blobs and vars directories from being added ever
+/blobs/*
+/vars/*
