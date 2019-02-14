@@ -1,0 +1,153 @@
+{%- set source_address = members_bgp_source[afi] -%}
+{%- set short_hostname = hostname.split('.')[0] -%}
+
+template bgp transit {
+    local as 8283;
+    import none;
+    import keep filtered;
+    export none;
+    next hop self;
+}
+
+function transit_import(int transit_tag)
+int set bogon_asns;
+{
+    # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+    allow_graceful_shutdown();
+
+    # Scrub BGP Communities (RFC 7454 Section 11)
+    bgp_community.delete([(8283, *)]);
+    bgp_large_community.delete([(8283, *, *)]);
+
+    # reject default routes
+    if (net.len = 0) then {
+        return false;
+    }
+
+    # Scrub BLACKHOLE community
+    bgp_community.delete((65535, 666));
+
+    # ignore bogon AS_PATHs
+    if is_bogon_aspath() then {
+        print "Reject: bogon AS_PATH: ", net, " ", bgp_path;
+        bgp_large_community.add((8283, rejected_route, r_bogon_aspath));
+        reject;
+    }
+
+    if ( is_coloclue_more_specific() ) then {
+        bgp_large_community.add((8283, rejected_route, r_coloclue_morespecific));
+        return false;
+    }
+
+    if ( is_bogon() ) then {
+        bgp_large_community.add((8283, rejected_route, r_bogon_prefix));
+        return false;
+    }
+
+    if ! is_acceptable_size() then {
+        print "Reject: too large or too small: ", net, " ", bgp_path, " protocol: ", proto;
+        bgp_large_community.add((8283, rejected_route, r_unacceptable_pfxlen));
+        reject;
+    }
+
+{% if rpki.validation %}
+    reject_rpki_invalid();
+{% endif %}
+
+    bgp_med = 0;
+    bgp_community.add((8283, transit_tag));
+    bgp_large_community.add((8283, 6, transit_tag));
+    return true;
+}
+
+{{ "" }}
+{%- if afi == "ipv4" -%}{%- set max_length = 32 -%}
+{%- elif afi == "ipv6" -%}{%- set max_length = 128 -%}
+{%- endif -%}
+
+{%- for profile_name, profile in transit.iteritems() -%}
+{{ "" }}
+{%- if profile['sessions'][short_hostname] is defined -%}
+# Begin {{ profile.name }}
+function transit_{{ profile_name }}_export(int graceful_shutdown) {
+    if ( is_coloclue_supernet()
+        || (8283, 2) ~ bgp_community
+        || (8283, 0, 2) ~ bgp_large_community
+        ) then {
+
+        bgp_path.delete([64512..65534]);
+
+        if ! is_acceptable_size() then {
+            reject;
+        }
+        else if ((8283, 2, {{ profile.as }}) ~ bgp_large_community || (8283, 2, 0) ~ bgp_large_community) then {
+            bgp_path.prepend(8283);
+        }
+        else if ((8283, 3, {{ profile.as }}) ~ bgp_large_community || (8283, 3, 0) ~ bgp_large_community) then {
+            bgp_path.prepend(8283);
+            bgp_path.prepend(8283);
+        }
+        if ((8283, 4, {{ profile.as }}) ~ bgp_large_community || (8283, 4, 0) ~ bgp_large_community) then {
+            reject;
+        }
+{%- if 'communities' in profile %}
+    {%- for transit_community in profile.communities %}
+        # {{ transit_community.comment }}
+        {%- if 'as' in transit_community %}
+        bgp_community.add(({{ transit_community.as }}, {{ transit_community.community }}));
+        {% else %}
+        bgp_community.add(({{ profile.as }}, {{ transit_community.community }}));
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+        if (graceful_shutdown = 1) then {
+            # enable the graceful shutdown community
+            bgp_community.add((65535, 0));
+        }
+
+        accept;
+    }
+{%- if hostname == "eunetworks-2.router.nl.coloclue.net" %}
+    else if proto = "blackhole1" then {
+        if ((net.len = 32 || net.len = 128) && is_coloclue_more_specific()) then {
+            bgp_community.add((38930, 666));  # Fiberring blackhole
+            bgp_community.add((65535, 666));  # Fusix BLACKHOLE
+            accept;
+        }
+        if ((net.len = 24 || net.len = 64) && is_coloclue_more_specific() ) then {
+            accept;
+        }
+        reject;
+    }
+{%- endif %}
+    reject;
+}
+
+{{ "" }}
+    {%- for router, sessions in profile.sessions.iteritems() -%}
+        {% if router == short_hostname %}
+            {% for session in sessions %}
+protocol bgp transit_{{ profile_name }}_{{ loop.index }} from transit {
+    description "{{ profile.name }} session {{ loop.index }}";
+    neighbor {% if afi == 'ipv4' -%}{{ session.ip4 }}{%- else -%}{{ session.ip6 }}{%- endif %} as {{ profile.as }};
+    include "ebgp_state.conf";
+    {% if profile['block_importexport'] or session['block_importexport'] -%}
+    import none;
+    export none;
+    {%- else -%}
+    import where transit_import({{ profile.tag }});
+    export where transit_{{ profile_name }}_export({%- if bgp[short_hostname|replace('-', '')]['graceful_shutdown'] or profile['graceful_shutdown'] or session['graceful_shutdown'] -%}1{%- else -%}0{%- endif -%});
+    {%- endif %}
+    {% if profile['admin_down_state'] or session['admin_down_state'] -%}
+    disabled;
+    {%- endif %}
+}
+{{ "" }}
+            {% endfor %}
+        {% endif %}
+    {%- endfor %}
+# End {{ profile.name }}
+{%- endif %}
+
+{% endfor -%}

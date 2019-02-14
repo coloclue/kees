@@ -1,0 +1,41 @@
+
+protocol bgp {{ neigh_name }} {
+    description "{{ description }}";
+    neighbor {{ neigh_ip }} as {{ asn }};
+    include "../ebgp_state.conf";
+    local as 8283;
+    next hop self;
+{%- if limit is greaterthan 0 %}
+    receive limit {{ limit }} action restart;
+{%- endif %}
+    import keep filtered;
+{%- if block_importexport %}
+    import none;
+{%- else %}
+    import filter {{ filter_name }};
+{%- endif %}
+{%- if block_importexport %}
+    export none;
+{%- elif export_full_table %}
+    export where full_table_export({{ asn }});
+{%- else %}
+    export where ebgp_peering_export({{ asn }});
+{%- endif %}
+{%- if password %}
+    password "{{ password }}";
+{%- endif %}
+{%- if gtsm %}
+    ttl security on;
+{%- endif %}
+{%- if multihop %}
+    multihop;
+    source address {{ source }};
+{%- endif %}
+{%- if admin_down_state %}
+    disabled;
+{%- endif %}
+{%- if graceful_shutdown %}
+    preference 0;
+{%- endif %}
+}
+

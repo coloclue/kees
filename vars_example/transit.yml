@@ -1,0 +1,66 @@
+---
+transit:
+  transit1:
+    name: Transit Provider 1 B.V.
+    as: 64500
+    tag: 26
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+    sessions:
+      eunetworks-2:
+        - ip4: 172.26.0.1
+          ip6: fd00:26::1:1
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+      dcg-1:
+        - ip4: 172.26.1.1
+          ip6: fd00:26:1::1:2
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+    communities:
+      - community: 65535
+        as: 64530
+        comment: don't spread through transit1 to upstream_transit1
+      - community: 65535
+        as: 64540
+        comment: don't spread through transit2 to upstream_transit1
+  transit2:
+    name: Transit Provider 2 V.O.F.
+    as: 64600
+    tag: 27
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+    sessions:
+      eunetworks-3:
+        - ip4: 172.27.0.1
+          ip6: fd00:27::1:1
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+        - ip4: 172.27.0.2
+          ip6: fd00:27::1:2
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+      dcg-2:
+        - ip4: 172.27.1.1
+          ip6: fd00:27:1::1:1
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+        - ip4: 172.27.1.2
+          ip6: fd00:27:1::1:2
+          graceful_shutdown: False
+          admin_down_state: False
+          block_importexport: False
+    communities:
+      - community: 6410
+        comment: prevent transit2 from sending route to upstream_transit1
+      - community: 6420
+        comment: prevent transit2 from sending route to upstream_transit2
+      - community: 6430
+        comment: prevent transit2 from sending route to upstream_transit3

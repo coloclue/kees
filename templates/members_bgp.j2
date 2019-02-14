@@ -1,0 +1,94 @@
+{%- set source_address = members_bgp_source[afi] -%}
+
+template bgp members {
+    local as 8283;
+    export all;
+    import keep filtered;
+    import none;
+    next hop self;
+    import limit 100 action restart;
+	default bgp_local_pref 500;
+}
+{{ "" }}
+{%- if afi == "ipv4" -%}{%- set max_length = 32 -%}
+{%- elif afi == "ipv6" -%}{%- set max_length = 128 -%}
+{%- endif -%}
+
+{%- for profile in members_bgp -%}
+{{ "" }}
+# Begin {{ profile.comment }}
+function member_{{ profile.lid }}_valid() {
+    {%- for item in profile.accept -%}
+        {%- if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix) -%}
+            {%- if item.global == True %}
+    if net ~ {{ item.prefix }}/{{ item.length }} then {
+        bgp_community.add((8283, 2));
+        bgp_large_community.add((8283, 0, 2));
+        return true;
+    }
+            {%- endif -%}
+{{ "" }}
+    if net ~ [{{ item.prefix }}/{{ item.length }}{{ "{" }}{{ item.length }},{{ max_length }}{{ "}" }}] then {
+        return true;
+    }
+        {%- endif -%}
+    {% endfor %}
+    return false;
+}
+filter member_{{ profile.lid }}_import {
+    if ! member_{{ profile.lid }}_valid() then {
+        bgp_large_community.add((8283, rejected_route, r_member_not_auth));
+        reject;
+    }
+    # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+    allow_graceful_shutdown();
+
+    if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
+    if (8283, 50) ~ bgp_community then bgp_local_pref = 50;
+    if (8283, 450) ~ bgp_community then bgp_local_pref = 450;
+    if (8283, 550) ~ bgp_community then bgp_local_pref = 550;
+    if (8283, 1, 450) ~ bgp_large_community then bgp_local_pref = 450;
+    if (8283, 1, 550) ~ bgp_large_community then bgp_local_pref = 550;
+    accept;
+}
+
+filter member_{{ profile.lid }}_export {
+	{%- if profile.disable_export == True %}
+	reject;
+	{%- elif profile.only_default == True %}
+	if proto = "static_default" then accept;
+	else reject;
+	{%- else %}
+    if ( is_bogon() || proto = "static_default" ) then reject;
+    else accept;
+	{%- endif %}
+}
+
+{{ "" }}
+    {%- for item in profile.sessions -%}
+        {%- for location, sessions in item.iteritems() -%}
+            {%- if location in hostname -%}
+                {%- for neighbor in sessions -%}
+                    {%- if (afi == "ipv4" and "." in neighbor) or (afi == "ipv6" and ":" in neighbor) -%}
+
+protocol bgp member_{{ profile.lid }}_{{ loop.index }} from members {
+    description "{{ profile.comment }}";
+    neighbor {{ neighbor }} as {{ profile.as }};
+    include "ebgp_state.conf";
+    import filter member_{{ profile.lid }}_import;
+    export filter member_{{ profile.lid }}_export;
+{%- if profile.lid in members_bgp_source %}
+    source address {{ members_bgp_source[profile.lid][afi] }};
+{%- elif members_bgp_source['default'][afi] %}
+    source address {{ members_bgp_source['default'][afi] }};
+{%- endif %}
+}
+{{ "" }}
+                    {%- endif -%}
+                {%- endfor -%}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endfor -%}
+# End
+
+{% endfor -%}

@@ -1,0 +1,21 @@
+hostname: "eunetworks-3.router.nl.coloclue.net"
+shortname: "eunetworks3"
+
+router_id: "94.142.247.6"
+
+interfaces:
+  backbone:
+    - "eno2"      # Backbone: EUN (eun-2)
+    - "eno3.706"  # backbone to dcg
+  external:
+    - "lo"
+    - "eno3.3906"    # Transit
+    - "eno4"         # Transit
+    - "enp4s0f0.7"   # IX 4
+    - "enp5s0f1.100" # members
+    - "enp5s0f1.201" # vlan member 3
+
+members_bgp_source:
+  default:
+    ipv4: "94.142.240.252"
+    ipv6: "2a02:898:0:20::e1"

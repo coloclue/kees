@@ -1,0 +1,11 @@
+protocol direct {
+    # backbone
+    {%- for interface in interfaces['backbone'] %}
+    interface "{{ interface }}";
+    {%- endfor %}
+
+    # external facing interfaces
+    {%- for interface in interfaces['external'] %}
+    interface "{{ interface }}";
+    {%- endfor %}
+}

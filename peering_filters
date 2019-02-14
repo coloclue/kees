@@ -1,0 +1,366 @@
+#!/usr/bin/env python
+
+"""
+    KEES
+
+    The ColoClue Network Automation Toolchain
+
+    (c) 2014-2017 Job Snijders <job@instituut.net>
+    (c) 2017-2019 Network committee Coloclue <routers@coloclue.net>
+
+"""
+
+from subprocess import PIPE
+from subprocess import Popen as run
+from hashlib import sha256
+from jinja2 import Environment, FileSystemLoader
+from numpy import base_repr
+import hiyapyco
+import ipaddr
+import json
+import os
+import requests
+import sys
+import time
+import yaml
+
+def download(url):
+    try:
+        downloaded_file = requests.get(url).text
+    except:
+        print >> sys.stderr, "Downloading %s failed" % (url)
+        sys.exit(2)
+
+    return downloaded_file
+
+netixlan = 'https://peeringdb.com/api/netixlan'
+pdb_data = json.loads(download(netixlan))
+
+pdb = {}
+for connection in pdb_data['data']:
+    asn = connection['asn']
+    v4 = connection['ipaddr4']
+    v6 = connection['ipaddr6']
+    if not asn in pdb:
+        pdb[asn] = []
+    if v4:
+        pdb[asn].append(v4)
+    if v6:
+        pdb[asn].append(v6)
+
+net = 'https://peeringdb.com/api/net'
+pdb_netdata = json.loads(download(net))
+
+max_prefixes = {}
+for netdata in pdb_netdata['data']:
+    asn = 'AS' + str(netdata['asn'])
+    if asn not in max_prefixes:
+        max_prefixes[asn] = {}
+    if 'info_prefixes4' in netdata:
+        maxprefixes_v4 = netdata['info_prefixes4']
+        if maxprefixes_v4 < 100:
+            max_prefixes[asn]['v4'] = 100
+        else:
+            max_prefixes[asn]['v4'] = int(maxprefixes_v4 * 1.1)
+    if 'info_prefixes6' in netdata:
+        maxprefixes_v6 = netdata['info_prefixes6']
+        if maxprefixes_v6 < 100:
+            max_prefixes[asn]['v6'] = 100
+        else:
+            max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
+
+if 'all' in sys.argv:
+    all = True
+else:
+    all = None
+
+with open('vars/generic.yml') as genfile:
+    generic = yaml.safe_load(genfile)
+
+peerings_flat = download(generic['peerings_url'])
+
+peerings = yaml.safe_load(peerings_flat)
+
+# ip addresses should not be needed to define ourselfs
+#   this could be retrieved from https://www.peeringdb.com/api/ixlan
+ixp_map = {}
+router_map = {}
+for ixp in generic['ixp_map']:
+    ixp_map[ixp] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
+                    ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+    router_map[ixp] = []
+    for router in generic['ixp_map'][ixp]['present_on']:
+        router_map[ixp].append(router)
+
+multihop_source_map = {}
+vendor_map = {}
+for routername in generic['bgp']:
+    fqdn = generic['bgp'][routername]['fqdn']
+    multihop_source_map[fqdn] = {}
+    multihop_source_map[fqdn]['ipv4'] = generic['bgp'][routername]['ipv4']
+    multihop_source_map[fqdn]['ipv6'] = generic['bgp'][routername]['ipv6']
+    vendor_map[fqdn] = generic['bgp'][routername]['vendor']
+
+allow_upto = {
+    4: "24",
+    6: "48"
+}
+
+# store the directory in which the script was started
+# this is used to find template files
+launchdir = os.getcwd()
+
+try:
+    os.chdir('/opt/routefilters/')
+except:
+    print "/opt/routefilters/ does not exist?"
+    sys.exit(2)
+
+
+def render(tpl_path, context):
+    path, filename = os.path.split(launchdir + '/' + tpl_path)
+    return Environment(
+        loader=FileSystemLoader(path or './')
+    ).get_template(filename).render(context)
+
+
+def generate_filters(asn, as_set, irr_order):
+
+    # inner function for actual bgpq3 execution
+    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order):
+
+        stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
+
+        if flags:
+            p = run(["bgpq3", "-h", "rr.ntt.net", "-S", irr_order, "-R",
+                     allow_upto[v], "-%s" % v, vendor] + flags +
+                    ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
+        else:
+            p = run(["bgpq3", "-h", "rr.ntt.net", "-S", irr_order, "-R",
+                     allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
+                     "-A", asn] + as_set, stdout=PIPE)
+
+        f = open(filename, "w")
+        config = str(p.communicate()[0])
+        f.write(config)
+        f.close()
+
+    # BIRD IPv4
+    for v in [4, 6]:
+        if as_set == "ANY":
+            continue
+        filename = '%s.prefixset.bird.ipv%s' % (asn, v)
+        if os.path.exists(filename):
+            if time.time() - os.path.getmtime(filename) > 3600:
+                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order)
+                print "bird ipv%s refreshed: %s" % (v, filename)
+            else:
+                print "bird ipv%s cached: %s" % (v, filename)
+        else:
+            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order)
+            print "bird ipv%s created: %s" % (v, filename)
+
+seen_router_policy = []
+seen_bird_peers = {}
+
+
+def config_snippet(asn, peer, description, ixp, router, no_filter,
+                   export_full_table, limits, gtsm, peer_type,
+                   multihop, multihop_source_map, generic, admin_down_state,
+                   block_importexport):
+    if not peer_type in ['upstream', 'peer', 'downstream']:
+        print "ERROR: invalid peertype: %s for %s" % (peer_type, asn)
+        sys.exit(2)
+    as_number = asn.replace("AS", "")
+    global seen_router_policy
+    vendor = vendor_map[router]
+    v = ipaddr.IPAddress(peer).version
+    policy_name = "AUTOFILTER:%s:IPv%s" % (asn, v)
+
+    if vendor == "bird":
+        global seen_bird_peers
+        if asn not in seen_bird_peers:
+            seen_bird_peers[asn] = 0
+        else:
+            seen_bird_peers[asn] = seen_bird_peers[asn] + 1
+        peer_count = seen_bird_peers[asn]
+
+        if no_filter:
+            filter_name = "ebgp_unfiltered_peering_import"
+        else:
+            filter_name = "peer_in_%s_ipv%s" % (asn, v)
+
+        password = None
+        if asn in generic['bgp_passwords']:
+            password = generic['bgp_passwords'][asn]
+
+        limit = limits[v]
+        neighbor_name = base_repr(int(sha256(peer).hexdigest(), 16), 36)[:6]
+
+        peer_info = {'asn': asn.replace('AS', ''), 'afi': v,
+                     'prefix_set': policy_name.replace(':', '_'),
+                     'neigh_ip': peer,
+                     'neigh_name': 'peer_%s_%s' % (asn, neighbor_name),
+                     'description': description,
+                     'filter_name': filter_name,
+                     'limit': limit,
+                     'gtsm': gtsm,
+                     'multihop': multihop,
+                     'password': password,
+                     'peer_type': peer_type,
+                     'source': multihop_source_map[router]["ipv%s" % v],
+                     'export_full_table': export_full_table,
+                     'ixp': ixp,
+                     'rpki': generic['rpki'],
+                     'admin_down_state': admin_down_state,
+                     'block_importexport': block_importexport
+                     }
+
+        peer_config_blob = render('templates/peer.j2', peer_info)
+        f = open('%s.ipv%s.config' % (router, v), "aw")
+        if not (router, asn, v) in seen_router_policy:
+            seen_router_policy.append((router, asn, v))
+            filter_config_blob = render('templates/filter.j2', peer_info)
+            f.write(filter_config_blob)
+        f.write(peer_config_blob)
+        f.close()
+
+for router in vendor_map:
+    if vendor_map[router] == "bird":
+        try:
+            os.remove("%s.ipv4.config" % router)
+            os.remove("%s.ipv6.config" % router)
+        except OSError:
+            print "INFO: Config for %s wasn't present, no need to delete" % router
+
+for asn in peerings:
+
+    if all:
+        irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,GT,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC"
+        if 'irr_order' in peerings[asn]:
+            irr_order = peerings[asn]['irr_order']
+
+        generate_filters(asn, peerings[asn]['import'].split(), irr_order)
+    elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
+        continue
+
+    sessions = []
+    if 'only_with' in peerings[asn]:
+        sessions = peerings[asn]['only_with']
+    elif 'private_peerings' in peerings[asn]:
+        sessions = peerings[asn]['private_peerings']
+    elif int(asn[2:]) in pdb:
+        sessions = pdb[int(asn[2:])]
+    else:
+        continue
+
+    for session in sessions:
+        session_ip = ipaddr.IPAddress(session)
+        for ixp in ixp_map:
+            for subnet in ixp_map[ixp]:
+                if session_ip in subnet:
+                    print "found peer %s in IXP %s" % (session_ip, ixp)
+                    print "must deploy on %s" % " ".join(router_map[ixp])
+                    description = peerings[asn]['description']
+                    for router in router_map[ixp]:
+                        routershort = router.split('.')[0]
+                        routershortnodash = routershort.replace('-', '')
+
+                        if 'only_on' in peerings[asn] and router not in peerings[asn]['only_on']:
+                            continue
+
+                        if 'type' in peerings[asn]:
+                            peer_type = peerings[asn]['type']
+                        else:
+                            peer_type = "peer"
+
+                        if peerings[asn]['import'] == "ANY":
+                            no_filter = True
+                        else:
+                            no_filter = False
+                        if peerings[asn]['export'] == "ANY":
+                            export_full_table = True
+                        else:
+                            export_full_table = False
+
+                        # set max prefix settings (if available)
+                        limits = {}
+                        if 'ipv4_limit' in peerings[asn]:
+                            limits[4] = peerings[asn]['ipv4_limit']
+                        elif asn in max_prefixes and 'v4' in max_prefixes[asn]:
+                            limits[4] = max_prefixes[asn]['v4']
+                        else:
+                            limits[4] = 10000
+                        if 'ipv6_limit' in peerings[asn]:
+                            limits[6] = peerings[asn]['ipv6_limit']
+                        elif asn in max_prefixes and 'v6' in max_prefixes[asn]:
+                            limits[6] = max_prefixes[asn]['v6']
+                        else:
+                            limits[6] = 1000
+
+                        gtsm = False
+                        if 'gtsm' in peerings[asn]:
+                            if peerings[asn]['gtsm']:
+                                gtsm = True
+
+                        multihop = False
+                        if 'multihop' in peerings[asn]:
+                            if peerings[asn]['multihop']:
+                                multihop = True
+
+                        ixprouter = ixp + '-' + routershort
+                        admin_down_state = False
+                        # Is the IXP defined in the bgp_groups settings
+                        if ixp in generic['bgp_groups']:
+                            # If if has a admin_down_state setting
+                            if 'admin_down_state' in generic['bgp_groups'][ixp]:
+                                # Configure it to whatever it is set in the config
+                                admin_down_state = \
+                                    generic['bgp_groups'][ixp]['admin_down_state']
+                        # If a specific router of a IXP connection is configured
+                        if ixprouter in generic['bgp_groups']:
+                            # If it has a admin_down_state setting
+                            if 'admin_down_state' in \
+                                    generic['bgp_groups'][ixprouter] \
+                                    and admin_down_state is False:
+                                    # ^^^ And it hasn't been configured above yet
+                                # Set it to whatever it is set to in the config
+                                admin_down_state = \
+                                    generic['bgp_groups'][ixprouter]['admin_down_state']
+
+                        graceful_shutdown = False
+                        if ixp in generic['bgp_groups']:
+                            if 'graceful_shutdown' in generic['bgp_groups'][ixp]:
+                                graceful_shutdown = \
+                                    generic['bgp_groups'][ixp]['graceful_shutdown']
+                        if ixprouter in generic['bgp_groups']:
+                            if 'graceful_shutdown' in \
+                                    generic['bgp_groups'][ixprouter] \
+                                    and graceful_shutdown is False:
+                                graceful_shutdown = \
+                                    generic['bgp_groups'][ixprouter]['graceful_shutdown']
+                        if 'graceful_shutdown' in \
+                                generic['bgp'][routershortnodash] \
+                                and graceful_shutdown is False:
+                            graceful_shutdown = \
+                                generic['bgp'][routershortnodash]['graceful_shutdown']
+
+                        block_importexport = False
+                        if ixp in generic['bgp_groups'] or ixprouter in generic['bgp_groups']:
+                            if 'block_importexport' in \
+                                    generic['bgp_groups'][ixp] \
+                                    or 'block_importexport' in generic['bgp_groups'][ixprouter]:
+                                block_importexport = \
+                                    generic['bgp_groups'][ixp]['block_importexport']
+                        if ixprouter in generic['bgp_groups']:
+                            if 'block_importexport' \
+                                    in generic['bgp_groups'][ixprouter] \
+                                    and block_importexport is False:
+                                block_importexport = \
+                                    generic['bgp_groups'][ixprouter]['block_importexport']
+
+                        config_snippet(asn, str(session_ip), description, ixp,
+                                       router, no_filter, export_full_table,
+                                       limits, gtsm, peer_type, multihop,
+                                       multihop_source_map, generic,
+                                       admin_down_state, block_importexport)

@@ -1,0 +1,7 @@
+{%- if rpki['whitelist'][afi] is not none -%}
+define rpkiwhitelist = [
+    {%- for prefix in rpki['whitelist'][afi] %}
+	{{ prefix }}
+	{%- endfor %}
+];
+{% endif %}

@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+"""
+    KEES
+
+    The ColoClue Network Automation Toolchain
+
+    (c) 2014-2017 Job Snijders <job@instituut.net>
+    (c) 2017-2019 Network committee Coloclue <routers@coloclue.net>
+
+"""
+
+from jinja2 import Environment, FileSystemLoader
+import hiyapyco
+import os
+import sys
+
+try:
+    import argparse
+except ImportError:
+    print("ERROR: install argparse manually")
+    print("HINT: sudo pip install argparse")
+    sys.exit(2)
+
+
+def render(tpl_path, context):
+    path, filename = os.path.split(tpl_path)
+    return Environment(
+        loader=FileSystemLoader(path or './')
+    ).get_template(filename).render(context)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('-y', dest='yamldata',
+                        default="vars/main.yml",
+                        type=str,
+                        nargs='*',
+                        help="""Location of the YAML data""")
+
+    parser.add_argument('-t', dest='template',
+                        type=str,
+						required=True,
+                        help="""Location of the template""")
+
+    parser.add_argument('-o', dest='output',
+						type=str,
+                        default='-',
+                        help='Output file (default: STDOUT)')
+
+    parser.add_argument('-d', dest='debug',
+                        action='store_true',
+                        help="""Enable debug""")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-4', dest='afi',
+                       action='store_const',
+                       const="ipv4",
+                       help="""IPv4 mode""")
+    group.add_argument('-6', dest='afi',
+                       action='store_const',
+                       const="ipv6",
+                       help="""IPv6 mode""")
+
+    args = parser.parse_args()
+    if args.debug:
+        print args
+
+    data = hiyapyco.load(*args.yamldata, method=hiyapyco.METHOD_MERGE)
+    data['afi'] = args.afi
+
+    if args.debug:
+        print data
+
+    if args.output == "-":
+        print(render(args.template, data))
+    else:
+        f = open(args.output, 'w')
+        f.write(render(args.template, data))
+        f.close
+
+if __name__ == '__main__':
+    main()

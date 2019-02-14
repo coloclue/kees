@@ -1,0 +1,16 @@
+#!/bin/bash
+set -ev
+
+# generate filters and configs
+./peering_filters all
+
+if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print a['rpki']['validation'];" < vars/generic.yml)" == "True" ]; then
+    rtrsub --afi ipv4 < ./templates/bird-rpki.j2 > /opt/routefilters/rpki/rpki-ipv4.conf
+    rtrsub --afi ipv6 < ./templates/bird-rpki.j2 > /opt/routefilters/rpki/rpki-ipv6.conf
+
+    ./gentool -4 -y vars/generic.yml -t templates/rpkiwhitelist.j2 -o /opt/routefilters/rpki/rpkiwhitelist-ipv4.conf
+    ./gentool -6 -y vars/generic.yml -t templates/rpkiwhitelist.j2 -o /opt/routefilters/rpki/rpkiwhitelist-ipv6.conf
+else
+    rm -f /opt/routefilters/rpki/rpki-ipv4.conf
+    rm -f /opt/routefilters/rpki/rpki-ipv6.conf
+fi

@@ -1,0 +1,92 @@
+{% macro export_features() %}
+        if ! is_acceptable_size() then {
+            reject;
+        }
+        else if ((8283, 2, peerasn) ~ bgp_large_community || (8283, 2, 0) ~ bgp_large_community) then {
+            bgp_path.prepend(8283);
+        }
+        else if ((8283, 3, peerasn) ~ bgp_large_community || (8283, 3, 0) ~ bgp_large_community) then {
+            bgp_path.prepend(8283);
+            bgp_path.prepend(8283);
+        }
+        if ((8283, 4, peerasn) ~ bgp_large_community || (8283, 4, 0) ~ bgp_large_community) then {
+            reject;
+        }
+{% endmacro %}
+
+function allow_graceful_shutdown() {
+    if (65535, 0) ~ bgp_community then {
+        bgp_local_pref = 0;
+    }
+}
+
+function ebgp_peering_export(int peerasn) {
+    if ( is_coloclue_supernet()
+        || (8283, 2) ~ bgp_community
+        || (8283, 0, 2) ~ bgp_large_community
+        ) then {
+
+        bgp_path.delete([64512..65534]);
+
+        {{ export_features() }}
+        accept;
+    }
+    reject;
+}
+
+function full_table_export(int peerasn) {
+    if ( is_coloclue_supernet() ) then accept;
+    else if ( is_coloclue_more_specific() ) then {
+        reject;
+    }
+    else if ( is_bogon() ) then reject;
+    else if ( bgp_path.last = 8283 ) then reject;
+    else {
+        {{ export_features () }}
+        accept;
+    }
+}
+
+/*
+    This filter is used for peers for which
+    we cannot do strict IRR filtering
+*/
+filter ebgp_unfiltered_peering_import
+prefix set acceptable_sizes;
+{
+    # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut-06
+    allow_graceful_shutdown();
+
+    # Scrub communities from peering partners
+    bgp_community.delete((65535, 666));
+    bgp_community.delete([(8283, *)]);
+    bgp_large_community.delete([(8283, *, *)]);
+
+    if is_bogon_aspath() then {
+        print "Reject: bogon AS_PATH: ", net, " ", bgp_path, " protocol: ", proto;
+        bgp_large_community.add((8283, rejected_route, r_bogon_aspath));
+        reject;
+    }
+
+    if ( is_coloclue_more_specific() ) then {
+        bgp_large_community.add((8283, rejected_route, r_coloclue_morespecific));
+        reject;
+    }
+    if ( is_bogon() ) then {
+        bgp_large_community.add((8283, rejected_route, r_bogon_prefix));
+        reject;
+    }
+
+{% if rpki.validation %}
+    reject_rpki_invalid();
+{% endif %}
+
+    if is_acceptable_size() then {
+        bgp_med = 0;
+        bgp_community.add((8283,1));
+        bgp_large_community.add((8283, 0, 1));
+        accept;
+    }
+    bgp_large_community.add((8283, rejected_route, r_unacceptable_pfxlen));
+    reject;
+}

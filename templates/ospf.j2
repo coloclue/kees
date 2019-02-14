@@ -1,0 +1,17 @@
+protocol ospf ospf1 {
+    import filter only_loopbacks;
+    export filter only_loopbacks;
+    area 0.0.0.0 {
+{%- for interface in interfaces['backbone'] %}
+        interface "{{ interface }}" {
+{%- if 'maintenance_mode' in bgp[shortname] %}
+{%- if bgp[shortname]['maintenance_mode'] %}
+            cost 65535;
+{%- endif %}
+{%- endif %}
+            type pointopoint;
+            bfd on;
+        };
+{%- endfor %}
+    };
+}

@@ -1,0 +1,8 @@
+{% if bgp[shortname]['maintenance_mode'] %}
+# All EBGP sessions are currently shutdown
+disabled;
+{% else %}
+# if the words preference 0 is in this file, this EBGP session shouldn't be used
+# if the word disabled is in this file, all EBGP sessions will shutdown
+# but right now this file is doing nothing
+{% endif %}

@@ -1,0 +1,81 @@
+
+filter peer_in_AS{{ asn }}_ipv{{ afi }}
+prefix set {{ prefix_set }};
+{
+    # ignore bogon AS_PATHs
+    if is_bogon_aspath() then {
+        print "Reject: bogon AS_PATH: ", net, " ", bgp_path;
+        bgp_large_community.add((8283, rejected_route, r_bogon_aspath));
+        reject;
+    }
+
+    if ( is_coloclue_more_specific() ) then {
+        print "Reject: 8283 more specific: ", net, " ", bgp_path, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
+        bgp_large_community.add((8283, rejected_route, r_coloclue_morespecific));
+        reject;
+    }
+    if ( is_bogon() ) then {
+        print "Reject: bogon: ", net, " ", bgp_path, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
+        bgp_large_community.add((8283, rejected_route, r_bogon_prefix));
+        reject;
+    }
+
+    if ! is_acceptable_size() then {
+        print "Reject: too large or too small: ", net, " ", bgp_path, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
+        bgp_large_community.add((8283, rejected_route, r_unacceptable_pfxlen));
+        reject;
+    }
+
+    # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+    allow_graceful_shutdown();
+
+{% if graceful_shutdown %}
+    bgp_community.add((65535, 0));
+{% endif %}
+
+{% if peer_type == "peer" %}
+    # Scrub BGP Communities (RFC 7454 Section 11) from peering partners
+    bgp_community.delete([(8283, *)]);
+    bgp_large_community.delete([(8283, *, *)]);
+    # Scrub BLACKHOLE Community from peering partners
+    bgp_community.delete((65535, 666));
+    bgp_community.add((8283,1)); /* mark peering routes as peering routes */
+    bgp_large_community.add((8283, 0, 1)); /* mark peering routes as peering routes */
+{% endif %}
+
+
+{% if rpki.validation %}
+    reject_rpki_invalid();
+{% endif %}
+
+    include "AS{{ asn }}.prefixset.bird.ipv{{ afi }}";
+    if (net ~ {{ prefix_set }}{% if rpki.validation %} || origin_to_roa({{ asn }}){% endif %}) then {
+        bgp_med = 0;
+
+{%- if peer_type == "downstream" %}
+        bgp_community.add((8283,2));
+        bgp_large_community.add((8283,0, 2));
+        if (8283, 50) ~ bgp_community then bgp_local_pref = 50;
+        if (8283, 150) ~ bgp_community then bgp_local_pref = 150;
+        if (8283, 1, 50) ~ bgp_large_community then bgp_local_pref = 50;
+        if (8283, 1, 150) ~ bgp_large_community then bgp_local_pref = 150;
+{%- endif %}
+
+        # classifications
+        if (net ~ {{ prefix_set }}) then {
+            bgp_community.add((8283, 101));
+            bgp_large_community.add((8283, 5, 1));
+        }
+{% if rpki.validation %}
+        if (origin_to_roa({{ asn }})) then {
+            bgp_community.add((8283, 102));
+            bgp_large_community.add((8283, 5, 2));
+        }
+{% endif %}
+        accept;
+    }
+    print "Reject: No IRR? ", net, " ", bgp_path, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
+    bgp_large_community.add((8283, rejected_route, r_no_irr));
+    reject;
+}
+

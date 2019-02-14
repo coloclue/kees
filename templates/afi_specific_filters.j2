@@ -1,0 +1,114 @@
+{%- if afi == "ipv4" -%}
+{%- set maxlength = 32 -%}
+{%- elif afi == "ipv6" -%}
+{%- set maxlength = 128 -%}
+{%- endif -%}
+filter only_loopbacks {
+{%- if afi == "ipv4" %}
+    if net ~ [ 94.142.247.0/28{32,32} ] then accept;
+{%- elif afi == "ipv6" %}
+    if net ~ [ 2a02:898:0:300:0:0:0:0/64{128,128} ] then accept;
+{%- endif %}
+    reject;
+}
+
+function is_coloclue_supernet()
+prefix set coloclue;
+{
+    coloclue = [
+{%-
+for item in coloclue.supernets 
+if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix)
+%}
+        {{ item.prefix }}/{{ item.length }}
+{%- if not loop.last %},{% endif -%}
+{%- if item.comment %}  /* {{ item.comment }} */{% endif -%}
+{%- endfor %}
+    ];
+    if net ~ coloclue then return true;
+    return false;
+}
+
+function is_coloclue_more_specific()
+prefix set coloclue;
+{
+    coloclue = [
+{%-
+for item in coloclue.supernets
+if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix)
+%}
+        {{ item.prefix }}/{{ item.length }}{{ "{" }}{{ item.length }},{{ maxlength }}{{ "}" }}
+{%- if not loop.last %},{% endif -%}
+{%- if item.comment %}  /* {{ item.comment }} */{% endif -%}
+{% endfor %}
+    ];
+    if net ~ coloclue then return true;
+    return false;
+}
+
+function is_bogon()
+prefix set bogons;
+{
+    bogons = [
+{%-
+for item in bogons
+if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix)
+%}
+        {{ item.prefix }}/{{ item.length }}{{ "{" }}{{ item.length }},{{ maxlength }}{{ "}" }}
+{%- if not loop.last %},{% endif -%}
+{%- if item.comment %}  /* {{ item.comment }} */{% endif -%}
+{% endfor %}
+    ];
+    if net ~ bogons then return true;
+    return false;
+}
+
+function is_bogon_aspath()
+int set bogon_asns;
+{
+    bogon_asns = [0, 23456, 64496..131071, 4200000000..4294967295];
+    if (bgp_path ~ bogon_asns) then {
+        return true;
+    }
+    return false;
+}
+
+function is_acceptable_size()
+prefix set acceptable_sizes;
+{
+{%- if afi == "ipv4" %}
+    acceptable_sizes = [ 0.0.0.0/0{8,24} ];
+{%- elif afi == "ipv6" %}
+    acceptable_sizes = [ 2000::/3{12,48} ];
+{%- endif %}
+    if net ~ acceptable_sizes then return true;
+    return false;
+}
+
+{% if rpki.validation %}
+function reject_rpki_invalid()
+{
+    {% if rpki['whitelist'][afi] is not none -%}
+    if (net ~ rpkiwhitelist) then {
+        bgp_community.add((8283, 104));
+        bgp_large_community.add((8283, 5, 4));
+        accept;
+    }
+    else {% endif %}if (roa_check(ROAS, net, bgp_path.last_nonaggregated) = ROA_VALID) then {
+        /* add rfc8097 marker to routes for which a valid matching ROA exists */
+        bgp_ext_community.add((unknown 0x4300, 0, 0));
+        bgp_community.add((8283, 103));
+        bgp_large_community.add((8283, 5, 3));
+    }
+    else if (roa_check(ROAS, net, bgp_path.last_nonaggregated) = ROA_INVALID) then {
+        print "Reject: RPKI ROA check failed for ", net, " ", bgp_path, " protocol: ", proto;
+        bgp_ext_community.add((unknown 0x4300, 0, 2));
+        bgp_large_community.add((8283, rejected_route, r_rpki_invalid));
+        reject;
+    }
+    else {
+        /* add rfc8097 marker to routes for which no covering ROA exists */
+        bgp_ext_community.add((unknown 0x4300, 0, 1));
+    }
+}
+{% endif %}

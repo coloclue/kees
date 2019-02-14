@@ -1,0 +1,273 @@
+process:
+  envvars:
+    user: "bird"
+    group: "bird"
+
+peerings_url: https://raw.githubusercontent.com/coloclue/peering/master/peers.yaml
+
+bgp_groups:
+  "amsix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "nlix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "nlix-dcg-1":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "nlix-eunetworks-3":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "asteroid":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "speedix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+
+coloclue:
+  supernets:
+    - prefix: "94.142.240.0"
+      length: 21
+      comment: "Coloclue IPv4 PA space"
+    - prefix: "185.52.224.0"
+      length: 22
+      comment: "Coloclue IPv4 PA space"
+    - prefix: "2a02:898::"
+      length: 32
+      comment: "Coloclue IPv6 PA space"
+
+rpki:
+  validation: true
+  whitelist:
+    ipv4:
+    ipv6:
+
+# this defines the iBGP mesh, and defines which routers we have
+bgp:
+  "eunetworks2":
+    fqdn: eunetworks-2.router.nl.coloclue.net
+    ipv4: 94.142.247.3
+    ipv6: 2a02:898:0:300::3
+    vendor: bird
+    graceful_shutdown: false
+    maintenance_mode: false
+  "eunetworks3":
+    fqdn: eunetworks-3.router.nl.coloclue.net
+    ipv4: 94.142.247.6
+    ipv6: 2a02:898:0:300::6
+    vendor: bird
+    graceful_shutdown: false
+    maintenance_mode: false
+  "dcg1":
+    fqdn: dcg-1.router.nl.coloclue.net
+    ipv4: 94.142.247.1
+    ipv6: 2a02:898:0:300::1
+    vendor: bird
+    graceful_shutdown: false
+    maintenance_mode: false
+  "dcg2":
+    fqdn: dcg-2.router.nl.coloclue.net
+    ipv4: 94.142.247.2
+    ipv6: 2a02:898:0:300::2
+    vendor: bird
+    graceful_shutdown: false
+    maintenance_mode: false
+
+ixp_map:
+  amsix:
+    ipv4_range: 80.249.208.0/21
+    ipv6_range: 2001:7f8:1::/64
+    present_on:
+      - eunetworks-2.router.nl.coloclue.net
+  nlix:
+    ipv4_range: 193.239.116.0/22
+    ipv6_range: 2001:7f8:13::/64
+    present_on:
+      - dcg-1.router.nl.coloclue.net
+      - eunetworks-3.router.nl.coloclue.net
+  asteroid:
+    ipv4_range: 185.1.94.0/24
+    ipv6_range: 2001:7f8:b6::/64
+    present_on:
+      - dcg-1.router.nl.coloclue.net
+  speedix:
+    ipv4_range: 185.1.95.0/24
+    ipv6_range: 2001:7f8:b7::/64
+    present_on:
+      - dcg-2.router.nl.coloclue.net
+  private-eun:
+    ipv4_range: 62.115.144.32/31
+    ipv6_range: 2001:2000:3080:0ebc::/126
+    present_on:
+      - eunetworks-2.router.nl.coloclue.net
+  private-dcg:
+    ipv4_range: 4.68.73.168/30
+    ipv6_range: 2001:1900:5:3::190/126
+    present_on:
+      - dcg-1.router.nl.coloclue.net
+
+bgp_passwords:
+    AS112: largecommunities
+    AS15169: XXX
+
+bogons:
+  - prefix: "0.0.0.0"
+    length: 8
+    comment: "IANA - Local Identification"
+  - prefix: "10.0.0.0"
+    length: 8
+    comment: "RFC 1918 - Private Use"
+  - prefix: "127.0.0.0"
+    length: 8
+    comment: "IANA - Loopback"
+  - prefix: "169.254.0.0"
+    length: 16
+    comment: "RFC 3927 - Link Local"
+  - prefix: "172.16.0.0"
+    length: 12
+    comment: "RFC 1918 - Private Use"
+  - prefix: "192.0.0.0"
+    length: 24
+    comment: "multiple RFCs"
+  - prefix: "192.0.2.0"
+    length: 24
+    comment: "RFC 5737 - TEST-NET-1"
+  - prefix: "192.168.0.0"
+    length: 16
+    comment: "RFC 1918 - Private Use"
+  - prefix: "198.18.0.0"
+    length: 15
+    comment: "RFC 2544 - Network Interconnect Device Benchmark Testing"
+  - prefix: "198.51.100.0"
+    length: 24
+    comment: "RFC 5737 - TEST-NET-2"
+  - prefix: "203.0.113.0"
+    length: 24
+    comment: "RFC 5737 - TEST-NET-3"
+  - prefix: "224.0.0.0"
+    length: 3
+    comment: "RFC 5771 - Multcast (formerly Class D)"
+  - prefix: "100.64.0.0"
+    length: 10
+    comment: "RFC 6598 - Shared Address Space"
+  - prefix: "193.239.116.0"
+    length: 22
+    comment: "IXP: NL-IX Public Peering LAN"
+  - prefix: "2001:7f8:13::"
+    length: 64
+    comment: "IXP: NL-IX Public Peering LAN"
+  - prefix: "80.249.208.0"
+    length: 21
+    comment: "IXP: AMS-IX Public Peering LAN"
+  - prefix: "2001:7f8:1::"
+    length: 48
+    comment: "IXP: AMS-IX Public Peering LAN"
+  - prefix: "185.1.94.0"
+    length: 24
+    comment: "IXP: Asteroid Amsterdam Public Peering LAN"
+  - prefix: "2001:7f8:b6::"
+    length: 64
+    comment: "IXP: Asteroid Amsterdam Public Peering LAN"
+  - prefix: "185.1.95.0"
+    length: 24
+    comment: "IXP: Speed IX Peering LAN"
+  - prefix: "2001:7f8:b7::"
+    length: 64
+    comment: "IXP: Speed IX Peering LAN"
+  - prefix: "164.138.24.80"
+    length: 29
+    comment: "Tilaa OOB"
+  - prefix: "0000::"
+    length: 8
+    comment: "loopback, unspecified, v4-mapped"
+  - prefix: "0064:ff9b::"
+    length: 96
+    comment: "RFC 6052 - IPv4-IPv6 Translation"
+  - prefix: "0100::"
+    length: 8
+    comment: "RFC 6666 - reserved for Discard-Only Address Block"
+  - prefix: "0200::"
+    length: 7
+    comment: "RFC 4048 - Reserved by IETF"
+  - prefix: "0400::"
+    length: 6
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "0800::"
+    length: 5
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "1000::"
+    length: 4
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "2001::"
+    length: 33
+    comment: "RFC 4380 - Teredo prefix"
+  - prefix: "2001:0:8000::"
+    length: 33
+    comment: "RFC 4380 - Teredo prefix"
+  - prefix: "2001:0002::"
+    length: 48
+    comment: "RFC 5180 - Benchmarking"
+  - prefix: "2001:0003::"
+    length: 32
+    comment: "RFC 7450 - Automatic Multicast Tunneling"
+  - prefix: "2001:10::"
+    length: 28
+    comment: "RFC 4843 - Deprecated ORCHID"
+  - prefix: "2001:20::"
+    length: 28
+    comment: "RFC 7343 - ORCHIDv2"
+  - prefix: "2001:db8::"
+    length: 32
+    comment: "RFC 3849 - NON-ROUTABLE range to be used for documentation purpose"
+  - prefix: "2002::"
+    length: 16
+    comment: "RFC 3068 - 6to4 prefix"
+  - prefix: "3ffe::"
+    length: 16
+    comment: "RFC 5156 - used for the 6bone but was returned"
+  - prefix: "4000::"
+    length: 3
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "5f00::"
+    length: 8
+    comment: "RFC 5156 - used for the 6bone but was returned"
+  - prefix: "6000::"
+    length: 3
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "8000::"
+    length: 3
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "a000::"
+    length: 3
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "c000::"
+    length: 3
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "e000::"
+    length: 4
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "f000::"
+    length: 5
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "f800::"
+    length: 6
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "fc00::"
+    length: 7
+    comment: "RFC 4193 - Unique Local Unicast"
+  - prefix: "fe80::"
+    length: 10
+    comment: "RFC 4291 - Link Local Unicast"
+  - prefix: "fec0::"
+    length: 10
+    comment: "RFC 4291 - Reserved by IETF"
+  - prefix: "ff00::"
+    length: 8
+    comment: "RFC 4291 - Multicast"

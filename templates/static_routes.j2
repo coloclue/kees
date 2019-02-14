@@ -1,0 +1,22 @@
+protocol static {
+{%- for static in statics
+    if (":" in static.route and afi == "ipv6")
+    or ("." in static.route and afi == "ipv4")
+%}
+    {%- if static.via == "blackhole" %}
+    route {{ static.route }} blackhole;
+    {%- else %}
+    route {{ static.route }} via {{ static.via }};
+    {%- endif %}
+    {%- if static.comment %}  /* {{ static.comment }} */{% endif -%}
+    {%- endfor %}
+}
+
+protocol static static_default {
+{%- if afi == "ipv4" %}
+    route 0.0.0.0/0 blackhole;
+{% elif afi == "ipv6" %}
+    route ::0/0 blackhole;
+{% endif -%}
+}
+

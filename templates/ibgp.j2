@@ -1,0 +1,33 @@
+template bgp ibgp {
+    local as 8283;
+    import filter {
+        # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+        allow_graceful_shutdown();
+
+        # RFC 7999
+        if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
+
+        # the rest
+        accept;
+    };
+    export filter {
+        if proto = "blackhole1" then {
+            bgp_community.add((65535,666));
+            accept;
+        }
+        accept;
+    };
+    next hop self;
+}
+
+{%- for neighbor in bgp if not neighbor == shortname %}
+protocol bgp ibgp_{{ neighbor }} from ibgp {
+    neighbor {{ bgp[neighbor][afi] }} as 8283;
+    source address {{ bgp[shortname][afi] }};
+{%- if 'maintenance_mode' in bgp[neighbor] %}
+{%- if bgp[neighbor]['maintenance_mode'] %}
+    preference 0;
+{%- endif %}
+{%- endif %}
+}
+{%- endfor %}

@@ -1,0 +1,27 @@
+hostname: "dcg-1.router.nl.coloclue.net"
+shortname: "dcg1"
+
+router_id: "94.142.247.1"
+
+interfaces:
+  backbone:
+    - "eth2"      # internal wire to dcg-2
+    - "eth7.108"  # Backbone
+  external:
+    - "lo"        # loopback
+    - "eth4.100"  # members shared subnet
+    - "eth4.101"  # powerbars
+    - "eth4.201"  # vlan member 1
+    - "eth4.202"  # vlan member 2
+    - "eth6.7"    # IX 1
+    - "eth7.110"  # Transit
+    - "eth7.107"  # Peering: Tier1_1
+    - "eth7.300"  # IX 2
+  
+members_bgp_source:
+  default:
+    ipv4: "94.142.244.252"
+    ipv6: "2a02:898::d1"
+  300:
+    ipv4: "192.168.0.1"
+    ipv6: "fd00::1"
