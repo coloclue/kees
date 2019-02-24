@@ -9,7 +9,12 @@
             bgp_path.prepend(8283);
             bgp_path.prepend(8283);
         }
-        if ((8283, 204) ~ bgp_community || (8283, 4, peerasn) ~ bgp_large_community || (8283, 4, 0) ~ bgp_large_community) then {
+        if (   (8283, 204) ~ bgp_community
+            || (8283, 303) ~ bgp_community
+            || (8283, 4, peerasn) ~ bgp_large_community
+            || (8283, 4, 0) ~ bgp_large_community
+            || (8283, 303, 0) ~ bgp_large_community
+           ) then {
             reject;
         }
 {% endmacro %}
