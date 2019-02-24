@@ -53,15 +53,15 @@ filter member_{{ profile.lid }}_import {
 }
 
 filter member_{{ profile.lid }}_export {
-	{%- if profile.disable_export == True %}
-	reject;
-	{%- elif profile.only_default == True %}
-	if proto = "static_default" then accept;
-	else reject;
-	{%- else %}
-    if ( is_bogon() || proto = "static_default" ) then reject;
+    {%- if profile.disable_export == True %}
+    reject;
+    {%- elif profile.only_default == True %}
+    if proto = "static_default" then accept;
+    else reject;
+    {%- else %}
+    if ( is_bogon() || proto = "static_default" || (8283, 301) ~ bgp_community || (8283, 301, 0) ~ bgp_large_community) then reject;
     else accept;
-	{%- endif %}
+    {%- endif %}
 }
 
 {{ "" }}
