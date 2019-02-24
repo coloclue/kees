@@ -2,14 +2,14 @@
         if ! is_acceptable_size() then {
             reject;
         }
-        else if ((8283, 2, peerasn) ~ bgp_large_community || (8283, 2, 0) ~ bgp_large_community) then {
+        else if ((8283, 202) ~ bgp_community || (8283, 2, peerasn) ~ bgp_large_community || (8283, 2, 0) ~ bgp_large_community) then {
             bgp_path.prepend(8283);
         }
-        else if ((8283, 3, peerasn) ~ bgp_large_community || (8283, 3, 0) ~ bgp_large_community) then {
+        else if ((8283, 203) ~ bgp_community || (8283, 3, peerasn) ~ bgp_large_community || (8283, 3, 0) ~ bgp_large_community) then {
             bgp_path.prepend(8283);
             bgp_path.prepend(8283);
         }
-        if ((8283, 4, peerasn) ~ bgp_large_community || (8283, 4, 0) ~ bgp_large_community) then {
+        if ((8283, 204) ~ bgp_community || (8283, 4, peerasn) ~ bgp_large_community || (8283, 4, 0) ~ bgp_large_community) then {
             reject;
         }
 {% endmacro %}
