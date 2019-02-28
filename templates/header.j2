@@ -36,7 +36,7 @@ define r_unacceptable_pfxlen = 5;       # The route has an unacceptable large or
 define r_no_irr = 6;                    # No IRR object covers the route
 define r_member_not_auth = 7;           # Coloclue member is not authorized to announce this
 
-include "interfaces.conf";
+#include "interfaces.conf";
 
 {% if rpki.validation %}
 include "rpki/rpki-{{ afi }}.conf";
