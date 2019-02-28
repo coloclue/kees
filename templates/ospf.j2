@@ -3,6 +3,9 @@ protocol ospf ospf1 {
     export filter only_loopbacks;
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
+{%- if interface == 'lo' %}
+        interface "{{ interface }}";
+{%- else %}
         interface "{{ interface }}" {
 {%- if 'maintenance_mode' in bgp[shortname] %}
 {%- if bgp[shortname]['maintenance_mode'] %}
@@ -12,6 +15,7 @@ protocol ospf ospf1 {
             type pointopoint;
             bfd on;
         };
+{%- endif %}
 {%- endfor %}
     };
 }

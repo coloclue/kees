@@ -1,11 +1,11 @@
 protocol direct {
     # backbone
-    {%- for interface in interfaces['backbone'] %}
+    {%- for interface in interfaces['backbone'] if not interface == 'lo' %}
     interface "{{ interface }}";
     {%- endfor %}
 
     # external facing interfaces
-    {%- for interface in interfaces['external'] %}
+    {%- for interface in interfaces['external'] if not interface == 'lo' %}
     interface "{{ interface }}";
     {%- endfor %}
 }
