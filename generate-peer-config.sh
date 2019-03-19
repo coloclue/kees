@@ -5,6 +5,10 @@ set -ev
 ./peering_filters all
 
 if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print a['rpki']['validation'];" < vars/generic.yml)" == "True" ]; then
+    if [ ! -d /opt/routefilters/rpki ] ; then
+        mkdir /opt/routefilters/rpki
+    fi
+    
     rtrsub --afi ipv4 < ./templates/bird-rpki.j2 > /opt/routefilters/rpki/rpki-ipv4.conf
     rtrsub --afi ipv6 < ./templates/bird-rpki.j2 > /opt/routefilters/rpki/rpki-ipv6.conf
 
