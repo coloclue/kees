@@ -7,6 +7,8 @@ template bgp ibgp {
         # RFC 7999
         if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
 
+        not_loopbacks();
+
         # the rest
         accept;
     };
