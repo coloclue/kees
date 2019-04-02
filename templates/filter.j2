@@ -26,7 +26,7 @@ prefix set {{ prefix_set }};
         reject;
     }
 
-    # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+    # https://tools.ietf.org/html/rfc8326
     allow_graceful_shutdown();
 
 {% if graceful_shutdown %}
