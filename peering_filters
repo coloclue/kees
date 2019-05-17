@@ -116,6 +116,10 @@ except:
     print "/opt/routefilters/ does not exist?"
     sys.exit(2)
 
+if 'irr_source_host' in generic:
+    irr_source_host = generic['irr_source_host']
+else:
+    irr_source_host = 'rr.ntt.net'
 
 def render(tpl_path, context):
     path, filename = os.path.split(launchdir + '/' + tpl_path)
@@ -124,19 +128,19 @@ def render(tpl_path, context):
     ).get_template(filename).render(context)
 
 
-def generate_filters(asn, as_set, irr_order):
+def generate_filters(asn, as_set, irr_order, irr_source_host):
 
     # inner function for actual bgpq3 execution
-    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order):
+    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
 
         stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
 
         if flags:
-            p = run(["bgpq3", "-h", "rr.ntt.net", "-S", irr_order, "-R",
+            p = run(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
                      allow_upto[v], "-%s" % v, vendor] + flags +
                     ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
         else:
-            p = run(["bgpq3", "-h", "rr.ntt.net", "-S", irr_order, "-R",
+            p = run(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
                      allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
                      "-A", asn] + as_set, stdout=PIPE)
 
@@ -152,12 +156,12 @@ def generate_filters(asn, as_set, irr_order):
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
-                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order)
+                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
                 print "bird ipv%s refreshed: %s" % (v, filename)
             else:
                 print "bird ipv%s cached: %s" % (v, filename)
         else:
-            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order)
+            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
             print "bird ipv%s created: %s" % (v, filename)
 
 seen_router_policy = []
@@ -239,8 +243,10 @@ for asn in peerings:
         irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,GT,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC"
         if 'irr_order' in peerings[asn]:
             irr_order = peerings[asn]['irr_order']
+        elif 'irr_order' in generic:
+            irr_order = generic['irr_order']
 
-        generate_filters(asn, peerings[asn]['import'].split(), irr_order)
+        generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
     elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
         continue
 
