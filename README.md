@@ -1,6 +1,8 @@
 KEES - The Coloclue Network Automation Toolchain
 ================================================
 
+![alt text](https://raw.githubusercontent.com/coloclue/kees/master/kees_roof.jpg "'Kees' text on roof of a farm")
+
 This code in this repository is used for the following tasks:
 
     - use the database at https://github.com/coloclue/peering to generate all IXP peering
