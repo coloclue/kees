@@ -240,11 +240,12 @@ for router in vendor_map:
 for asn in peerings:
 
     if all:
-        irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,GT,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC"
         if 'irr_order' in peerings[asn]:
             irr_order = peerings[asn]['irr_order']
         elif 'irr_order' in generic:
             irr_order = generic['irr_order']
+        else:
+            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,ARIN-WHOIS,REGISTROBR"
 
         generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
     elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
