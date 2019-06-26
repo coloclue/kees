@@ -11,10 +11,10 @@ This code in this repository is used for the following tasks:
     - generate remaining BIRD configuration
     - push the BIRD configs to all boxes
 
-KEES IS AUTHORITIVE:
+KEES IS AUTHORITATIVE:
 --------------------
 
-    The 'kees' repository is the authoritve source for BIRD configurations in
+    The 'kees' repository is the authoritative source for BIRD configurations in
     the coloclue network. Any changes to the BIRD configuration on the routers
     will be overwritten by the scripts in this repository.
 
