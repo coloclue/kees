@@ -20,7 +20,7 @@ template bgp ibgp {
         accept;
     };
     next hop self;
-    bfd on;
+    #bfd on;
 }
 
 {%- for neighbor in bgp if not neighbor == shortname %}
