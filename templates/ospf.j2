@@ -3,17 +3,21 @@ protocol ospf ospf1 {
     export filter only_loopbacks;
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
-{%- if interface == 'lo' %}
-        interface "{{ interface }}";
+{%- if interface.nic == 'lo' %}
+        interface "{{ interface.nic }}";
 {%- else %}
-        interface "{{ interface }}" {
+        interface "{{ interface.nic }}" {
 {%- if 'maintenance_mode' in bgp[shortname] %}
 {%- if bgp[shortname]['maintenance_mode'] %}
             cost 65535;
 {%- endif %}
 {%- endif %}
             type pointopoint;
-            #bfd on;
+{%- if 'bfd' in interface -%}
+{% if interface['bfd'] %}
+            bfd on;
+{%- endif %}
+{%- endif %}
         };
 {%- endif %}
 {%- endfor %}
