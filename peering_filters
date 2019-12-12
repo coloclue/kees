@@ -276,6 +276,9 @@ for asn in peerings:
                         if 'only_on' in peerings[asn] and router not in peerings[asn]['only_on']:
                             continue
 
+                        if 'not_on' in peerings[asn] and ixp in peerings[asn]['not_on']:
+                            continue
+
                         if 'type' in peerings[asn]:
                             peer_type = peerings[asn]['type']
                         else:
