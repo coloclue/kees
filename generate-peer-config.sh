@@ -4,12 +4,12 @@ set -ev
 # generate filters and configs
 ./peering_filters all
 
-if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print a['rpki']['validation'];" < vars/generic.yml)" == "True" ]; then
+if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print(a['rpki']['validation']);" < vars/generic.yml)" == "True" ]; then
     if [ ! -d /opt/routefilters/rpki ] ; then
         mkdir /opt/routefilters/rpki
     fi
 
-    rpki_json_url="$(python -c "import yaml,sys; generic_yaml = yaml.safe_load(sys.stdin); print generic_yaml['rpki_json_url'];" < vars/generic.yml 2>/dev/null)"
+    rpki_json_url="$(python -c "import yaml,sys; generic_yaml = yaml.safe_load(sys.stdin); print(generic_yaml['rpki_json_url']);" < vars/generic.yml 2>/dev/null)"
     if [ "${?}" -ne 0 -o -z "${rpki_json_url}" ] ; then
         rtrsub_options=''
     else

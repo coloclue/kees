@@ -66,7 +66,7 @@ filter member_{{ profile.lid }}_export {
 
 {{ "" }}
     {%- for item in profile.sessions -%}
-        {%- for location, sessions in item.iteritems() -%}
+        {%- for location, sessions in item.items() -%}
             {%- if location in hostname -%}
                 {%- for neighbor in sessions -%}
                     {%- if (afi == "ipv4" and "." in neighbor) or (afi == "ipv6" and ":" in neighbor) -%}
