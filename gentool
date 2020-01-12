@@ -66,13 +66,13 @@ def main():
 
     args = parser.parse_args()
     if args.debug:
-        print args
+        print(args)
 
     data = hiyapyco.load(*args.yamldata, method=hiyapyco.METHOD_MERGE)
     data['afi'] = args.afi
 
     if args.debug:
-        print data
+        print(data)
 
     if args.output == "-":
         print(render(args.template, data))

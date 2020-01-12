@@ -65,7 +65,7 @@ int set bogon_asns;
 {%- elif afi == "ipv6" -%}{%- set max_length = 128 -%}
 {%- endif -%}
 
-{%- for profile_name, profile in transit.iteritems() -%}
+{%- for profile_name, profile in transit.items() -%}
 {{ "" }}
 {%- if profile['sessions'][short_hostname] is defined -%}
 # Begin {{ profile.name }}
@@ -130,7 +130,7 @@ function transit_{{ profile_name }}_export(int graceful_shutdown) {
 }
 
 {{ "" }}
-    {%- for router, sessions in profile.sessions.iteritems() -%}
+    {%- for router, sessions in profile.sessions.items() -%}
         {% if router == short_hostname %}
             {% for session in sessions %}
 protocol bgp transit_{{ profile_name }}_{{ loop.index }} from transit {
