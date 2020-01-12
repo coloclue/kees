@@ -15,7 +15,6 @@ from subprocess import Popen as run
 from hashlib import sha256
 from jinja2 import Environment, FileSystemLoader
 from numpy import base_repr
-import hiyapyco
 import ipaddr
 import json
 import os
