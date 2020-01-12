@@ -7,6 +7,9 @@ nbproject/
 # Ignore swapfiles from vi
 *.swp
 
+# Ignore the Python virtual enviroment build by PyCharm
+venv/
+
 # Prevent the blobs and vars directories from being added ever
 /blobs/*
 /vars/*
