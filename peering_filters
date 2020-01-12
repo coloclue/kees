@@ -11,7 +11,7 @@
 """
 
 from subprocess import PIPE
-from subprocess import Popen as run
+from subprocess import Popen
 from hashlib import sha256
 from jinja2 import Environment, FileSystemLoader
 from numpy import base_repr
@@ -23,14 +23,16 @@ import sys
 import time
 import yaml
 
+
 def download(url):
     try:
         downloaded_file = requests.get(url).text
-    except:
-        print >> sys.stderr, "Downloading %s failed" % (url)
+    except requests.exceptions.RequestException:
+        print("Downloading %s failed" % url, file=sys.stderr)
         sys.exit(2)
 
     return downloaded_file
+
 
 netixlan = 'https://peeringdb.com/api/netixlan'
 pdb_data = json.loads(download(netixlan))
@@ -40,7 +42,7 @@ for connection in pdb_data['data']:
     asn = connection['asn']
     v4 = connection['ipaddr4']
     v6 = connection['ipaddr6']
-    if not asn in pdb:
+    if asn not in pdb:
         pdb[asn] = []
     if v4:
         pdb[asn].append(v4)
@@ -69,9 +71,9 @@ for netdata in pdb_netdata['data']:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
 
 if 'all' in sys.argv:
-    all = True
+    update_peering = True
 else:
-    all = None
+    update_peering = None
 
 with open('vars/generic.yml') as genfile:
     generic = yaml.safe_load(genfile)
@@ -111,7 +113,7 @@ launchdir = os.getcwd()
 
 try:
     os.chdir('/opt/routefilters/')
-except:
+except IOError:
     print("/opt/routefilters/ does not exist?")
     sys.exit(2)
 
@@ -119,6 +121,7 @@ if 'irr_source_host' in generic:
     irr_source_host = generic['irr_source_host']
 else:
     irr_source_host = 'rr.ntt.net'
+
 
 def render(tpl_path, context):
     path, filename = os.path.split(launchdir + '/' + tpl_path)
@@ -135,13 +138,13 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
         stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
 
         if flags:
-            p = run(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                     allow_upto[v], "-%s" % v, vendor] + flags +
-                    ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
+            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+                      allow_upto[v], "-%s" % v, vendor] + flags +
+                      ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
         else:
-            p = run(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                     allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
-                     "-A", asn] + as_set, stdout=PIPE)
+            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+                      allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
+                      "-A", asn] + as_set, stdout=PIPE)
 
         f = open(filename, "w")
         bgpq3_result = p.communicate()
@@ -164,6 +167,7 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
             run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
             print("bird ipv%s created: %s" % (v, filename))
 
+
 seen_router_policy = []
 seen_bird_peers = {}
 
@@ -172,10 +176,9 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                    export_full_table, limits, gtsm, peer_type,
                    multihop, multihop_source_map, generic, admin_down_state,
                    block_importexport):
-    if not peer_type in ['upstream', 'peer', 'downstream']:
+    if peer_type not in ['upstream', 'peer', 'downstream']:
         print("ERROR: invalid peertype: %s for %s" % (peer_type, asn))
         sys.exit(2)
-    as_number = asn.replace("AS", "")
     global seen_router_policy
     vendor = vendor_map[router]
     v = ipaddr.IPAddress(peer).version
@@ -187,7 +190,6 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
             seen_bird_peers[asn] = 0
         else:
             seen_bird_peers[asn] = seen_bird_peers[asn] + 1
-        peer_count = seen_bird_peers[asn]
 
         if no_filter:
             filter_name = "ebgp_unfiltered_peering_import"
@@ -229,6 +231,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         f.write(peer_config_blob)
         f.close()
 
+
 for router in vendor_map:
     if vendor_map[router] == "bird":
         try:
@@ -239,13 +242,14 @@ for router in vendor_map:
 
 for asn in peerings:
 
-    if all:
+    if update_peering:
         if 'irr_order' in peerings[asn]:
             irr_order = peerings[asn]['irr_order']
         elif 'irr_order' in generic:
             irr_order = generic['irr_order']
         else:
-            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,ARIN-WHOIS,REGISTROBR"
+            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,"
+            irr_order += "ARIN-WHOIS,REGISTROBR"
 
         generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
     elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
@@ -329,11 +333,10 @@ for asn in peerings:
                                     generic['bgp_groups'][ixp]['admin_down_state']
                         # If a specific router of a IXP connection is configured
                         if ixprouter in generic['bgp_groups']:
-                            # If it has a admin_down_state setting
+                            # If it has a admin_down_state setting, and it hasn't been configured above yet
                             if 'admin_down_state' in \
                                     generic['bgp_groups'][ixprouter] \
                                     and admin_down_state is False:
-                                    # ^^^ And it hasn't been configured above yet
                                 # Set it to whatever it is set to in the config
                                 admin_down_state = \
                                     generic['bgp_groups'][ixprouter]['admin_down_state']

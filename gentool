@@ -42,11 +42,11 @@ def main():
 
     parser.add_argument('-t', dest='template',
                         type=str,
-						required=True,
+                        required=True,
                         help="""Location of the template""")
 
     parser.add_argument('-o', dest='output',
-						type=str,
+                        type=str,
                         default='-',
                         help='Output file (default: STDOUT)')
 
@@ -79,7 +79,8 @@ def main():
     else:
         f = open(args.output, 'w')
         f.write(render(args.template, data))
-        f.close
+        f.close()
+
 
 if __name__ == '__main__':
     main()
