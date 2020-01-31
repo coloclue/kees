@@ -122,3 +122,15 @@ function reject_rpki_invalid()
     }
 }
 {% endif %}
+
+{%- if afi == "ipv4" -%}{%- set blackhole_network_length = 24 -%}
+{%- elif afi == "ipv6" -%}{%- set blackhole_network_length = 64 -%}
+{%- endif -%}
+function blackhole_export() {
+    if proto = "blackhole1" then {
+        if (net.len = {{ blackhole_network_length }} && is_coloclue_more_specific() ) then {
+            accept;
+        }
+        reject;
+    }
+}
