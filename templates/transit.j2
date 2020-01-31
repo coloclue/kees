@@ -61,8 +61,8 @@ int set bogon_asns;
 }
 
 {{ "" }}
-{%- if afi == "ipv4" -%}{%- set max_length = 32 -%}
-{%- elif afi == "ipv6" -%}{%- set max_length = 128 -%}
+{%- if afi == "ipv4" -%}{%- set max_length = 32 -%}{%- set blackhole_network_length = 24 -%}
+{%- elif afi == "ipv6" -%}{%- set max_length = 128 -%}{%- set blackhole_network_length = 64 -%}
 {%- endif -%}
 
 {%- for profile_name, profile in transit.items() -%}
@@ -113,14 +113,13 @@ function transit_{{ profile_name }}_export(int graceful_shutdown) {
 
         accept;
     }
-{%- if hostname == "eunetworks-2.router.nl.coloclue.net" %}
+{%- if 'blackhole_community' in profile %}
     else if proto = "blackhole1" then {
-        if ((net.len = 32 || net.len = 128) && is_coloclue_more_specific()) then {
-            bgp_community.add((38930, 666));  # Fiberring blackhole
-            bgp_community.add((65535, 666));  # Fusix BLACKHOLE
+        if (net.len = {{ max_length }} && is_coloclue_more_specific()) then {
+            bgp_community.add(({{ profile.blackhole_community }}));
             accept;
         }
-        if ((net.len = 24 || net.len = 64) && is_coloclue_more_specific() ) then {
+        if (net.len = {{ blackhole_network_length }} && is_coloclue_more_specific() ) then {
             accept;
         }
         reject;
