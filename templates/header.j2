@@ -13,6 +13,7 @@ protocol bfd bfd1 {
 protocol kernel {
     scan time 20;
     device routes;
+    learn on;
 {% if hostname == "eunetworks-2.router.nl.coloclue.net" %}
     export filter {
         if proto = "blackhole1" then reject;
