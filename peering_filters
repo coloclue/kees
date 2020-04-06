@@ -132,23 +132,23 @@ def render(tpl_path, context):
 
 def generate_filters(asn, as_set, irr_order, irr_source_host):
 
-    # inner function for actual bgpq3 execution
-    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
+    # inner function for actual bgpq4 execution
+    def run_bgpq4(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
 
         stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
 
         if flags:
-            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+            p = Popen([generic['bgpq4_location'], "-h", irr_source_host, "-S", irr_order, "-R",
                       allow_upto[v], "-%s" % v, vendor] + flags +
                       ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
         else:
-            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+            p = Popen([generic['bgpq4_location'], "-h", irr_source_host, "-S", irr_order, "-R",
                       allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
                       "-A", asn] + as_set, stdout=PIPE)
 
         f = open(filename, "w")
-        bgpq3_result = p.communicate()
-        config = str(bgpq3_result[0], encoding='utf-8')
+        bgpq4_result = p.communicate()
+        config = str(bgpq4_result[0], encoding='utf-8')
         f.write(config)
         f.close()
 
@@ -159,12 +159,12 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
-                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+                run_bgpq4(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
                 print("bird ipv%s refreshed: %s" % (v, filename))
             else:
                 print("bird ipv%s cached: %s" % (v, filename))
         else:
-            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+            run_bgpq4(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
             print("bird ipv%s created: %s" % (v, filename))
 
 
