@@ -262,6 +262,9 @@ for asn in peerings:
         sessions = peerings[asn]['private_peerings']
     elif int(asn[2:]) in pdb:
         sessions = pdb[int(asn[2:])]
+        if 'not_with' in peerings[asn]:
+            for remove_ip in peerings[asn]['not_with']:
+                sessions.remove(remove_ip)
     else:
         continue
 
