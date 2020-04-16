@@ -18,7 +18,7 @@ include "rpkiwhitelist-{{ afi }}.conf";
 {%- if loop.previtem is not defined or loop.previtem['origin'] != roa['origin'] -%}
 define ROAS_AS{{ roa['origin'] }} = [
 {%- endif %}
-	{{ roa['prefix'] }}{% if roa['prefixlen'] != roa['maxlen'] %}{{ "{" }}{{ roa['prefixlen'] }},{{ roa['maxlen'] }}{{ "}" }}{% endif %}
+    {{ roa['prefix'] }}{% if roa['prefixlen'] != roa['maxlen'] %}{{ "{" }}{{ roa['prefixlen'] }},{{ roa['maxlen'] }}{{ "}" }}{% endif %}
 {%- if loop.nextitem is not defined or loop.nextitem['origin'] != roa['origin'] %}
 ];
 
@@ -36,8 +36,10 @@ roa table ROAS {
 function origin_to_roa(int asn)
 {
     case asn {
-{%- for origin in origin_dict|sort() if not origin == 0 %}
-        {{ origin }}: return net ~ ROAS_AS{{ origin }};
+{%- for roa in roa_list|sort(attribute='origin') if not origin == 0 %}
+{%- if loop.previtem is not defined or loop.previtem['origin'] != roa['origin'] %}
+        {{ roa['origin'] }}: return net ~ ROAS_AS{{ roa['origin'] }};
+{%- endif -%}
 {%- endfor %}
         else: return false;
     }
