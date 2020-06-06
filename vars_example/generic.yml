@@ -4,7 +4,9 @@ process:
     group: "bird"
 
 peerings_url: https://raw.githubusercontent.com/coloclue/peering/master/peers.yaml
-rpki_json_url: https://rpki.gin.ntt.net/api/export.json
+rpki_json_urls:
+  - https://rpki.gin.ntt.net/api/export.json
+  - https://rpki-validator.ripe.net/api/export.json
 
 bgp_groups:
   "amsix":
