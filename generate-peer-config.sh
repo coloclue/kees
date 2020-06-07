@@ -14,7 +14,7 @@ if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print(a['rpki'
         rtrsub_options=''
     else
         ./merge_rpki_json_urls.py < vars/generic.yml 2>/dev/null
-        if [ "${?}" -eq 0 ] then
+        if [ "${?}" -eq 0 ] ; then
             rtrsub_options="-c roas.json"
         fi
     fi
