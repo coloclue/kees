@@ -17,6 +17,9 @@ template bgp ibgp {
             bgp_community.add((65535,666));
             accept;
         }
+        if dest = RTD_BLACKHOLE then {
+            reject;
+        }
         accept;
     };
     next hop self;
