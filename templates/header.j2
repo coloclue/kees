@@ -8,6 +8,11 @@ timeformat route    iso long;
 router id {{ router_id }};
 
 protocol bfd bfd1 {
+    interface "e*.*" {
+        min rx interval 10 ms;
+        min tx interval 100 ms;
+        multiplier 20;
+    };
 }
 
 protocol kernel {
