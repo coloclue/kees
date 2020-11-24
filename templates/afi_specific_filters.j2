@@ -12,13 +12,16 @@ filter only_loopbacks {
     reject;
 }
 
-filter loopbacks_and_connected {
+filter ospf_export {
 {%- if afi == "ipv4" %}
     if net ~ [ 94.142.247.0/28{32,32} ] then accept;
+    if (net = 0.0.0.0/0) then reject;
 {%- elif afi == "ipv6" %}
     if net ~ [ 2a02:898:0:300:0:0:0:0/64{128,128} ] then accept;
+    if (net = ::/0) then reject;
 {%- endif %}
     if (source = RTS_DEVICE) then accept;
+    if (source = RTS_STATIC) then accept;
     reject;
 }
 
