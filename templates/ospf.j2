@@ -1,5 +1,5 @@
 protocol ospf ospf1 {
-    import filter loopbacks_and_connected;
+    import all;
     export filter loopbacks_and_connected;
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
