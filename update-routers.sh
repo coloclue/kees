@@ -13,7 +13,6 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o /opt/router-staging/${router}/header-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o /opt/router-staging/${router}/header-ipv6.conf
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o /opt/router-staging/${router}/bfd.conf
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o /opt/router-staging/${router}/ospf.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o /opt/router-staging/${router}/ibgp-ipv4.conf

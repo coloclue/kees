@@ -52,11 +52,6 @@ rpki:
     ipv4:
     ipv6:
 
-bfd:
-  min_rx_interval: 10
-  min_tx_interval: 100
-  multiplier: 20
-
 # this defines the iBGP mesh, and defines which routers we have
 bgp:
   "eunetworks2":
