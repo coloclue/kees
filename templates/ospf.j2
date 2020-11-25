@@ -1,6 +1,6 @@
 protocol ospf ospf1 {
     import all;
-    export filter loopbacks_and_connected;
+    export filter ospf_export;
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
 {%- if interface.nic == 'lo' %}
