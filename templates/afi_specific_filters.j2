@@ -3,15 +3,6 @@
 {%- elif afi == "ipv6" -%}
 {%- set maxlength = 128 -%}
 {%- endif -%}
-filter only_loopbacks {
-{%- if afi == "ipv4" %}
-    if net ~ [ 94.142.247.0/28{32,32} ] then accept;
-{%- elif afi == "ipv6" %}
-    if net ~ [ 2a02:898:0:300:0:0:0:0/64{128,128} ] then accept;
-{%- endif %}
-    reject;
-}
-
 filter ospf_export {
 {%- if afi == "ipv4" %}
     if net ~ [ 94.142.247.0/28{32,32} ] then accept;
@@ -25,13 +16,15 @@ filter ospf_export {
     reject;
 }
 
-function not_loopbacks()
+function not_ospf_export()
 {
 {%- if afi == "ipv4" %}
     if net ~ [ 94.142.247.0/28{32,32} ] then reject;
 {%- elif afi == "ipv6" %}
     if net ~ [ 2a02:898:0:300:0:0:0:0/64{128,128} ] then reject;
 {%- endif %}
+    if (source = RTS_DEVICE) then reject;
+    if (source = RTS_STATIC) then reject;
     accept;
 }
 
