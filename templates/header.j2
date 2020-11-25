@@ -7,14 +7,6 @@ timeformat route    iso long;
 
 router id {{ router_id }};
 
-protocol bfd bfd1 {
-    interface "e*.*" {
-        min rx interval 10 ms;
-        min tx interval 100 ms;
-        multiplier 20;
-    };
-}
-
 protocol kernel {
     scan time 20;
     device routes;
@@ -43,6 +35,8 @@ define r_no_irr = 6;                    # No IRR object covers the route
 define r_member_not_auth = 7;           # Coloclue member is not authorized to announce this
 
 include "interfaces.conf";
+
+include "bfd.conf";
 
 {% if rpki.validation %}
 include "rpki/rpki-{{ afi }}.conf";
