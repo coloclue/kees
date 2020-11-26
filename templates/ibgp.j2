@@ -7,8 +7,6 @@ template bgp ibgp {
         # RFC 7999
         if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
 
-        not_ospf_export();
-
         # the rest
         accept;
     };
@@ -20,6 +18,10 @@ template bgp ibgp {
         if dest = RTD_BLACKHOLE then {
             reject;
         }
+
+        # Filter out OSPF and Loopbacks
+        not_ospf_export();
+
         accept;
     };
     next hop self;
