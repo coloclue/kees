@@ -13,8 +13,6 @@ filter ospf_export {
 {%- endif %}
     if (source = RTS_DEVICE) then accept;
     if (source = RTS_STATIC) then accept;
-    if (source = RTS_OSPF) then reject;
-    if (source = RTS_OSPF_EXT2) then reject;
     reject;
 }
 
@@ -27,6 +25,8 @@ function not_ospf_export()
 {%- endif %}
     if (source = RTS_DEVICE) then reject;
     if (source = RTS_STATIC) then reject;
+    if (source = RTS_OSPF) then reject;
+    if (source = RTS_OSPF_EXT2) then reject;
     accept;
 }
 
