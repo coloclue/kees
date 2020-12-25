@@ -137,20 +137,21 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
 
         stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
 
-        if flags:
-            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                      allow_upto[v], "-%s" % v, vendor] + flags +
-                      ["-l", stanza_name, "-A", asn] + as_set, stdout=PIPE)
-        else:
-            p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                      allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
-                      "-A", asn] + as_set, stdout=PIPE)
-
-        f = open(filename, "w")
-        bgpq3_result = p.communicate()
-        config = str(bgpq3_result[0], encoding='utf-8')
-        f.write(config)
-        f.close()
+        with open(filename, "w") as bgpq3_result:
+            if flags:
+                p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+                        allow_upto[v], "-%s" % v, vendor] + flags +
+                        ["-l", stanza_name, "-A", asn] + as_set, stdout=bgpq3_result)
+            else:
+                p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
+                        allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
+                        "-A", asn] + as_set, stdout=bgpq3_result)
+        #print("DEBUG: bgpq args: {}".format(p.args))
+        now = time.perf_counter() # record current performance counter
+        p.wait()
+        bgpq_duration = time.perf_counter() - now
+        print("DEBUG: bgpq elapsed time: {}".format(bgpq_duration))
+        return p.returncode
 
     # BIRD IPv4
     for v in [4, 6]:
@@ -159,12 +160,18 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
-                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+                errno = run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+                if errno != 0:
+                    print("ERROR: bgpq3 returned non-zero for existing filename {}: {}".format(filename, errno))
+                    #sys.exit(errno)
                 print("bird ipv%s refreshed: %s" % (v, filename))
             else:
                 print("bird ipv%s cached: %s" % (v, filename))
         else:
-            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+            errno = run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+            if errno != 0:
+                print("ERROR: bgpq3 returned non-zero for filename {}: {}".format(filename, errno))
+                #sys.exit(errno)
             print("bird ipv%s created: %s" % (v, filename))
 
 
