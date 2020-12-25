@@ -122,12 +122,16 @@ if 'irr_source_host' in generic:
 else:
     irr_source_host = 'rr.ntt.net'
 
+j2_templates = {}
 
 def render(tpl_path, context):
+    global j2_templates
     path, filename = os.path.split(launchdir + '/' + tpl_path)
-    return Environment(
-        loader=FileSystemLoader(path or './')
-    ).get_template(filename).render(context)
+    if tpl_path not in j2_templates:
+        j2_templates[tpl_path] = Environment(
+            loader=FileSystemLoader(path or './')
+            ).get_template(filename)
+    return j2_templates[tpl_path].render(context)
 
 
 def generate_filters(asn, as_set, irr_order, irr_source_host):
