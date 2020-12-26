@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
     KEES
@@ -19,7 +19,7 @@ try:
     import argparse
 except ImportError:
     print("ERROR: install argparse manually")
-    print("HINT: sudo pip install argparse")
+    print("HINT: pip3 install argparse")
     sys.exit(2)
 
 

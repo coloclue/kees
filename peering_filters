@@ -133,7 +133,8 @@ def render(tpl_path, context):
 def generate_filters(asn, as_set, irr_order, irr_source_host):
 
     # inner function for actual bgpq3 execution
-    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
+    def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order,
+                  irr_source_host):
 
         stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
 
@@ -159,12 +160,14 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
-                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+                run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order,
+                          irr_source_host)
                 print("bird ipv%s refreshed: %s" % (v, filename))
             else:
                 print("bird ipv%s cached: %s" % (v, filename))
         else:
-            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
+            run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order,
+                      irr_source_host)
             print("bird ipv%s created: %s" % (v, filename))
 
 
@@ -201,7 +204,12 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
             password = generic['bgp_passwords'][asn]
 
         limit = limits[v]
-        neighbor_name = base_repr(int(sha256(str(peer).encode('utf-8')).hexdigest(), 16), 36)[:6]
+        neighbor_name = base_repr(
+            int(sha256(
+                str(peer).encode('utf-8')
+            ).hexdigest(), 16),
+            36
+        )[:6]
 
         peer_info = {'asn': asn.replace('AS', ''), 'afi': v,
                      'prefix_set': policy_name.replace(':', '_'),
@@ -238,7 +246,8 @@ for router in vendor_map:
             os.remove("%s.ipv4.config" % router)
             os.remove("%s.ipv6.config" % router)
         except OSError:
-            print("INFO: Config for %s wasn't present, no need to delete" % router)
+            print("INFO: Config for %s wasn't present, no need to delete"
+                  % router)
 
 for asn in peerings:
 
@@ -248,11 +257,15 @@ for asn in peerings:
         elif 'irr_order' in generic:
             irr_order = generic['irr_order']
         else:
-            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,"
+            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,"
+            irr_order = "APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,"
             irr_order += "ARIN-WHOIS,REGISTROBR"
 
-        generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
-    elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
+        generate_filters(
+            asn, peerings[asn]['import'].split(), irr_order, irr_source_host
+        )
+    elif (not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and
+          not os.path.isfile('%s.prefixset.bird.ipv6' % asn)):
         continue
 
     sessions = []
@@ -280,10 +293,12 @@ for asn in peerings:
                         routershort = router.split('.')[0]
                         routershortnodash = routershort.replace('-', '')
 
-                        if 'only_on' in peerings[asn] and router not in peerings[asn]['only_on']:
+                        if ('only_on' in peerings[asn] and
+                                router not in peerings[asn]['only_on']):
                             continue
 
-                        if 'not_on' in peerings[asn] and ixp in peerings[asn]['not_on']:
+                        if ('not_on' in peerings[asn] and
+                                ixp in peerings[asn]['not_on']):
                             continue
 
                         if 'type' in peerings[asn]:
@@ -329,14 +344,15 @@ for asn in peerings:
                         admin_down_state = False
                         # Is the IXP defined in the bgp_groups settings
                         if ixp in generic['bgp_groups']:
-                            # If if has a admin_down_state setting
+                            # If it has an admin_down_state setting
                             if 'admin_down_state' in generic['bgp_groups'][ixp]:
-                                # Configure it to whatever it is set in the config
+                                # Configure it to whatever it is set to in the config
                                 admin_down_state = \
                                     generic['bgp_groups'][ixp]['admin_down_state']
-                        # If a specific router of a IXP connection is configured
+                        # If a specific router of an IXP connection is configured
                         if ixprouter in generic['bgp_groups']:
-                            # If it has a admin_down_state setting, and it hasn't been configured above yet
+                            # If it has an admin_down_state setting, and it hasn't been
+                            # configured above yet
                             if 'admin_down_state' in \
                                     generic['bgp_groups'][ixprouter] \
                                     and admin_down_state is False:
@@ -362,10 +378,12 @@ for asn in peerings:
                                 generic['bgp'][routershortnodash]['graceful_shutdown']
 
                         block_importexport = False
-                        if ixp in generic['bgp_groups'] or ixprouter in generic['bgp_groups']:
-                            if 'block_importexport' in \
-                                    generic['bgp_groups'][ixp] \
-                                    or 'block_importexport' in generic['bgp_groups'][ixprouter]:
+                        if (ixp in generic['bgp_groups'] or
+                                ixprouter in generic['bgp_groups']):
+                            if ('block_importexport' in
+                                    generic['bgp_groups'][ixp] or
+                                    'block_importexport' in
+                                    generic['bgp_groups'][ixprouter]):
                                 block_importexport = \
                                     generic['bgp_groups'][ixp]['block_importexport']
                         if ixprouter in generic['bgp_groups']:

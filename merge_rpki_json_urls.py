@@ -5,8 +5,6 @@ import sys
 import json
 import requests
 
-# Load the generic config into a dict
-generic_yaml = yaml.safe_load(sys.stdin)
 
 # A function to get the content of a URL
 def download(url):
@@ -17,13 +15,18 @@ def download(url):
 
     return downloaded_file
 
+
+# Load the generic config into a dict
+generic_yaml = yaml.safe_load(sys.stdin)
+
 # Dict to store all the ASNs and their info in
 asns = {}
 
 # Loop through JSON URLs
 url_counter = 0
 for json_url in generic_yaml['rpki_json_urls']:
-    # Increase the URL counter, so we can count how many files there have been downloaded
+    # Increase the URL counter, so we can count how many files there have been
+    # downloaded
     url_counter += 1
 
     # Download URL
@@ -35,7 +38,7 @@ for json_url in generic_yaml['rpki_json_urls']:
     # Parse json into dict
     try:
         roas = json.loads(json_raw)
-    except:
+    except Exception:
         print("Parsing JSON from", json_url, "failed.", file=sys.stderr)
         continue
 
@@ -67,7 +70,7 @@ if len(roas['roas']) == 0:
 
 # Convert roa info to JSON
 json_output = json.JSONEncoder().encode(roas)
-# Write json into roa.json file
-roa_file = open('roas.json', 'w')
-roa_file.write (json_output)
+# Write json into file
+roa_file = open('/tmp/kees-roas.json', 'w')
+roa_file.write(json_output)
 roa_file.close()
