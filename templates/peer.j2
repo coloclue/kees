@@ -29,7 +29,7 @@ protocol bgp {{ neigh_name }} {
 {%- endif %}
 {%- if multihop %}
     multihop;
-    {%- if disable_multihop_source_map is False %}
+    {%- if not disable_multihop_source_map %}
     source address {{ source }};
     {%- endif %}
 {%- endif %}
