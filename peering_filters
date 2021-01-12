@@ -383,6 +383,6 @@ for asn in peerings:
 
                         config_snippet(asn, str(session_ip), description, ixp,
                                        router, no_filter, export_full_table,
-                                       limits, gtsm, peer_type, multihop, disable_multihop_source_map
+                                       limits, gtsm, peer_type, multihop, disable_multihop_source_map,
                                        multihop_source_map, generic,
                                        admin_down_state, block_importexport)
