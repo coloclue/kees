@@ -27,6 +27,7 @@ function allow_graceful_shutdown() {
 
 function ebgp_peering_export(int peerasn) {
     if ( is_coloclue_supernet()
+        || is_coloclue_beacon()
         || (8283, 2) ~ bgp_community
         || (8283, 0, 2) ~ bgp_large_community
         ) then {

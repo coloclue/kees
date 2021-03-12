@@ -1,6 +1,9 @@
 #!/bin/bash
 set -ev
 
+# Ensure /usr/sbin/bird{,6} are in the path.
+PATH=$PATH:/usr/sbin
+
 # generate peer configs
 ./peering_filters
 
@@ -23,8 +26,8 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
 
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/generic_filters.j2 -o /opt/router-staging/${router}/generic_filters.conf
 
-    ./gentool -4 -y vars/generic.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv4_filters.conf
-    ./gentool -6 -y vars/generic.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv6_filters.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv4_filters.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv6_filters.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/members_bgp.yml -t templates/members_bgp.j2 -o /opt/router-staging/${router}/members_bgp-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/members_bgp.yml -t templates/members_bgp.j2 -o /opt/router-staging/${router}/members_bgp-ipv6.conf
