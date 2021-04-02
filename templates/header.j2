@@ -13,7 +13,13 @@ protocol kernel {
     learn on;
 {% if hostname == "eunetworks-2.router.nl.coloclue.net" %}
     export filter {
-        if proto = "blackhole1" then reject;
+        if proto = "blackhole1" then {
+            if (net.len = 24) then {
+                accept;
+            }
+            reject;
+        }
+
         accept;
     };
 {% else %}
