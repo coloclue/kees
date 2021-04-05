@@ -35,6 +35,9 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/transit.yml -t templates/transit.j2 -o /opt/router-staging/${router}/transit-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/transit.yml -t templates/transit.j2 -o /opt/router-staging/${router}/transit-ipv6.conf
 
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv6.conf
+
     # DCG specific stuff
     if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dcg-2.router.nl.coloclue.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dcg.yml -o /opt/router-staging/${router}/static_routes-ipv4.conf

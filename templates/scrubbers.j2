@@ -1,0 +1,26 @@
+{%- set short_hostname = hostname.split('.')[0] -%}
+filter via_scrubber
+prefix set announce_via_scrubber;
+{
+    include "via_scrubbers_{{ afi }}.conf";
+
+    if (net ~ announce_via_scrubber) then accept;
+    else reject;
+}
+
+{% for scrubber, scrubberinfo in scrubbers.items() -%}
+	{%- for router, session in scrubberinfo.sessions.items() -%}
+		{%- if router == short_hostname -%}
+			{%- for neighbor in session[afi] -%}
+protocol bgp scrubber_{{ scrubber }}_{{ loop.index }} {
+    description "{{ scrubberinfo.description }}";
+    local as 8283;
+    neighbor {{ neighbor }} as {{ scrubberinfo['as'] }};
+    import keep filtered;
+    import none;
+    export filter via_scrubber;
+}
+{% endfor -%}
+		{%- endif -%}
+	{%- endfor -%}
+{%- endfor -%}

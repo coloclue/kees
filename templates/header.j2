@@ -11,20 +11,7 @@ protocol kernel {
     scan time 20;
     device routes;
     learn on;
-{% if hostname == "eunetworks-2.router.nl.coloclue.net" %}
-    export filter {
-        if proto = "blackhole1" then {
-            if (net.len = 24) then {
-                accept;
-            }
-            reject;
-        }
-
-        accept;
-    };
-{% else %}
     export all;
-{% endif %}
 }
 
 protocol device {
@@ -57,3 +44,5 @@ include "generic_filters.conf";
 include "ospf.conf";
 
 include "ibgp-{{ afi }}.conf";
+
+include "scrubber-{{ afi }}.conf";
