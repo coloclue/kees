@@ -18,6 +18,11 @@ protocol ospf ospf1 {
             bfd on;
 {%- endif %}
 {%- endif %}
+{%- if 'maintenance' in interface -%}
+{% if interface['maintenance'] %}
+            cost 65535;
+{%- endif %}
+{%- endif %}
         };
 {%- endif %}
 {%- endfor %}
