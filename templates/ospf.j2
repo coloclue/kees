@@ -3,28 +3,27 @@ protocol ospf ospf1 {
     export filter ospf_export;
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
-{%- if interface.nic == 'lo' %}
+	{%- if interface.nic == 'lo' %}
         interface "{{ interface.nic }}";
-{%- else %}
+	{%- else %}
         interface "{{ interface.nic }}" {
-{%- if 'maintenance_mode' in bgp[shortname] %}
-{%- if bgp[shortname]['maintenance_mode'] %}
+		{%- if 'maintenance_mode' in bgp[shortname] and bgp[shortname]['maintenance_mode'] %}
             cost 65535;
-{%- endif %}
-{%- endif %}
+		{%- elif 'maintenance' in interface and interface['maintenance'] %}
+            cost 65535;
+		{%- elif 'cost' in interface %}
+            cost {{ interface.cost }};
+		{%- else %}
+            cost {{ ospf.default_cost }};
+		{%- endif %}
             type pointopoint;
-{%- if 'bfd' in interface -%}
-{% if interface['bfd'] %}
+		{%- if 'bfd' in interface -%}
+			{% if interface['bfd'] %}
             bfd on;
-{%- endif %}
-{%- endif %}
-{%- if 'maintenance' in interface -%}
-{% if interface['maintenance'] %}
-            cost 65535;
-{%- endif %}
-{%- endif %}
+			{%- endif %}
+		{%- endif %}
         };
-{%- endif %}
+	{%- endif %}
 {%- endfor %}
     };
 }
