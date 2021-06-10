@@ -14,6 +14,9 @@ protocol bgp {{ neigh_name }} {
 {%- else %}
     import filter {{ filter_name }};
 {%- endif %}
+{%- if bgp_local_pref is defined %}
+    default bgp_local_pref {{ bgp_local_pref }};
+{%- endif %}
 {%- if block_importexport %}
     export none;
 {%- elif export_full_table %}
