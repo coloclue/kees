@@ -99,6 +99,24 @@ Dependencies:
     hiyapyco - https://pypi.python.org/pypi/HiYaPyCo
     bgpq3  - https://github.com/snar/bgpq3
 
+To prepare a Debian machine to build Kees:
+
+```
+sudo apt install python3-pip bgpq3 jinja2 python-pip
+sudo pip3 install rtrsub
+sudo pip3 install numpy
+sudo pip3 install ipaddr
+sudo pip3 install pyyaml
+sudo pip install jinja2
+sudo pip install hiyapyco
+
+sudo mkdir -p /opt/routefilters/
+sudo mkdir -p /opt/router-staging/
+sudo chown -R ${USER} /opt/routefilters/ /opt/router-staging/
+```
+
+And symlink in your `vars/` and `blobs/` directories.
+
 Authors:
 -------
 

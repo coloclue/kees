@@ -1,6 +1,9 @@
 #!/bin/bash
 set -ev
 
+# Ensure /usr/sbin/bird{,6} are in the path.
+PATH=$PATH:/usr/sbin
+
 # generate peer configs
 ./peering_filters
 
@@ -13,6 +16,7 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o /opt/router-staging/${router}/header-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o /opt/router-staging/${router}/header-ipv6.conf
+    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o /opt/router-staging/${router}/bfd.conf
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o /opt/router-staging/${router}/ospf.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o /opt/router-staging/${router}/ibgp-ipv4.conf
@@ -22,14 +26,17 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
 
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/generic_filters.j2 -o /opt/router-staging/${router}/generic_filters.conf
 
-    ./gentool -4 -y vars/generic.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv4_filters.conf
-    ./gentool -6 -y vars/generic.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv6_filters.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv4_filters.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/afi_specific_filters.j2 -o /opt/router-staging/${router}/ipv6_filters.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/members_bgp.yml -t templates/members_bgp.j2 -o /opt/router-staging/${router}/members_bgp-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/members_bgp.yml -t templates/members_bgp.j2 -o /opt/router-staging/${router}/members_bgp-ipv6.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/transit.yml -t templates/transit.j2 -o /opt/router-staging/${router}/transit-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/transit.yml -t templates/transit.j2 -o /opt/router-staging/${router}/transit-ipv6.conf
+
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv6.conf
 
     # DCG specific stuff
     if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dcg-2.router.nl.coloclue.net" ]; then

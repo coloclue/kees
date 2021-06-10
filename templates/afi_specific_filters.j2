@@ -25,6 +25,8 @@ function not_ospf_export()
 {%- endif %}
     if (source = RTS_DEVICE) then reject;
     if (source = RTS_STATIC) then reject;
+    if (source = RTS_OSPF) then reject;
+    if (source = RTS_OSPF_EXT2) then reject;
     accept;
 }
 
@@ -59,6 +61,21 @@ if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.pref
 {% endfor %}
     ];
     if net ~ coloclue then return true;
+    return false;
+}
+
+function is_coloclue_beacon()
+{
+    # Prefix must fall within one of our supernets, otherwise it cannot be a beacon.
+    if (!is_coloclue_more_specific()) then return false;
+
+{%-
+for item in coloclue.beacons
+if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix)
+%}
+    if (net = {{ item.prefix }}/{{ item.length }}) then return true;
+{%- if item.comment %}  /* {{ item.comment }} */{% endif -%}
+{%- endfor %}
     return false;
 }
 

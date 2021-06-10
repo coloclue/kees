@@ -174,7 +174,7 @@ seen_bird_peers = {}
 
 def config_snippet(asn, peer, description, ixp, router, no_filter,
                    export_full_table, limits, gtsm, peer_type,
-                   multihop, multihop_source_map, generic, admin_down_state,
+                   multihop, disable_multihop_source_map, multihop_source_map, generic, admin_down_state,
                    block_importexport):
     if peer_type not in ['upstream', 'peer', 'downstream']:
         print("ERROR: invalid peertype: %s for %s" % (peer_type, asn))
@@ -212,6 +212,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'limit': limit,
                      'gtsm': gtsm,
                      'multihop': multihop,
+                     'disable_multihop_source_map': disable_multihop_source_map,
                      'password': password,
                      'peer_type': peer_type,
                      'source': multihop_source_map[router]["ipv%s" % v],
@@ -325,6 +326,11 @@ for asn in peerings:
                             if peerings[asn]['multihop']:
                                 multihop = True
 
+                        disable_multihop_source_map = False
+                        if 'disable_multihop_source_map' in peerings[asn]:
+                            if peerings[asn]['disable_multihop_source_map']:
+                                disable_multihop_source_map = True
+
                         ixprouter = ixp + '-' + routershort
                         admin_down_state = False
                         # Is the IXP defined in the bgp_groups settings
@@ -377,6 +383,6 @@ for asn in peerings:
 
                         config_snippet(asn, str(session_ip), description, ixp,
                                        router, no_filter, export_full_table,
-                                       limits, gtsm, peer_type, multihop,
+                                       limits, gtsm, peer_type, multihop, disable_multihop_source_map,
                                        multihop_source_map, generic,
                                        admin_down_state, block_importexport)

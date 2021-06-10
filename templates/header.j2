@@ -7,26 +7,11 @@ timeformat route    iso long;
 
 router id {{ router_id }};
 
-protocol bfd bfd1 {
-    interface "e*.*" {
-        min rx interval 10 ms;
-        min tx interval 100 ms;
-        multiplier 20;
-    };
-}
-
 protocol kernel {
     scan time 20;
     device routes;
     learn on;
-{% if hostname == "eunetworks-2.router.nl.coloclue.net" %}
-    export filter {
-        if proto = "blackhole1" then reject;
-        accept;
-    };
-{% else %}
     export all;
-{% endif %}
 }
 
 protocol device {
@@ -44,6 +29,8 @@ define r_member_not_auth = 7;           # Coloclue member is not authorized to a
 
 include "interfaces.conf";
 
+include "bfd.conf";
+
 {% if rpki.validation %}
 include "rpki/rpki-{{ afi }}.conf";
 
@@ -57,3 +44,5 @@ include "generic_filters.conf";
 include "ospf.conf";
 
 include "ibgp-{{ afi }}.conf";
+
+include "scrubber-{{ afi }}.conf";
