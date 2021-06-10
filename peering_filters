@@ -87,8 +87,15 @@ peerings = yaml.safe_load(peerings_flat)
 ixp_map = {}
 router_map = {}
 for ixp in generic['ixp_map']:
-    ixp_map[ixp] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
-                    ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+    ixp_map[ixp] = {}
+    ixp_map[ixp]['subnets'] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
+                               ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+
+    # Set a default bgp_local_pref of 100, allow for IXP based override
+    ixp_map[ixp]['bgp_local_pref'] = 100
+    if 'bgp_local_pref' in generic['ixp_map'][ixp]:
+      ixp_map[ixp]['bgp_local_pref'] = generic['ixp_map'][ixp]['bgp_local_pref']
+
     router_map[ixp] = []
     for router in generic['ixp_map'][ixp]['present_on']:
         router_map[ixp].append(router)
@@ -174,8 +181,8 @@ seen_bird_peers = {}
 
 def config_snippet(asn, peer, description, ixp, router, no_filter,
                    export_full_table, limits, gtsm, peer_type,
-                   multihop, disable_multihop_source_map, multihop_source_map, generic, admin_down_state,
-                   block_importexport):
+                   multihop, disable_multihop_source_map, multihop_source_map, generic,
+                   admin_down_state, block_importexport, bgp_local_pref):
     if peer_type not in ['upstream', 'peer', 'downstream']:
         print("ERROR: invalid peertype: %s for %s" % (peer_type, asn))
         sys.exit(2)
@@ -220,7 +227,8 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'ixp': ixp,
                      'rpki': generic['rpki'],
                      'admin_down_state': admin_down_state,
-                     'block_importexport': block_importexport
+                     'block_importexport': block_importexport,
+                     'bgp_local_pref': bgp_local_pref
                      }
 
         peer_config_blob = render('templates/peer.j2', peer_info)
@@ -272,9 +280,10 @@ for asn in peerings:
     for session in sessions:
         session_ip = ipaddr.IPAddress(session)
         for ixp in ixp_map:
-            for subnet in ixp_map[ixp]:
+            for subnet in ixp_map[ixp]['subnets']:
+                bgp_local_pref = ixp_map[ixp]['bgp_local_pref']
                 if session_ip in subnet:
-                    print("found peer %s in IXP %s" % (session_ip, ixp))
+                    print("found peer %s in IXP %s with localpref %d" % (session_ip, ixp, bgp_local_pref))
                     print("must deploy on %s" % " ".join(router_map[ixp]))
                     description = peerings[asn]['description']
                     for router in router_map[ixp]:
@@ -380,9 +389,8 @@ for asn in peerings:
                                     and block_importexport is False:
                                 block_importexport = \
                                     generic['bgp_groups'][ixprouter]['block_importexport']
-
                         config_snippet(asn, str(session_ip), description, ixp,
                                        router, no_filter, export_full_table,
                                        limits, gtsm, peer_type, multihop, disable_multihop_source_map,
                                        multihop_source_map, generic,
-                                       admin_down_state, block_importexport)
+                                       admin_down_state, block_importexport, bgp_local_pref)

@@ -143,6 +143,9 @@ protocol bgp transit_{{ profile_name }}_{{ loop.index }} from transit {
     import where transit_import({{ profile.tag }});
     export where transit_{{ profile_name }}_export({%- if bgp[short_hostname|replace('-', '')]['graceful_shutdown'] or profile['graceful_shutdown'] or session['graceful_shutdown'] -%}1{%- else -%}0{%- endif -%});
     {%- endif %}
+    {% if session['bgp_local_pref'] is defined -%}
+    default bgp_local_pref {{ session['bgp_local_pref'] }};
+    {%- endif %}
     {% if profile['admin_down_state'] or session['admin_down_state'] -%}
     disabled;
     {%- endif %}

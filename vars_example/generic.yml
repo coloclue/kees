@@ -94,9 +94,11 @@ ixp_map:
     ipv6_range: 2001:7f8:1::/64
     present_on:
       - eunetworks-2.router.nl.coloclue.net
+#    bgp_local_pref: 100   ## The default bgp_local_pref is 100 if it is not set.
   nlix:
     ipv4_range: 193.239.116.0/22
     ipv6_range: 2001:7f8:13::/64
+    bgp_local_pref: 110
     present_on:
       - dcg-1.router.nl.coloclue.net
       - eunetworks-3.router.nl.coloclue.net
