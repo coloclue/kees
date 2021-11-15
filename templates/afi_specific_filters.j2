@@ -129,19 +129,13 @@ function reject_rpki_invalid()
     }
     else {% endif %}if (roa_check(ROAS, net, bgp_path.last) = ROA_VALID) then {
         /* add rfc8097 marker to routes for which a valid matching ROA exists */
-        bgp_ext_community.add((unknown 0x4300, 0, 0));
         bgp_community.add((8283, 103));
         bgp_large_community.add((8283, 5, 3));
     }
     else if (roa_check(ROAS, net, bgp_path.last) = ROA_INVALID) then {
         print "Reject: RPKI ROA check failed for ", net, " ", bgp_path, " protocol: ", proto;
-        bgp_ext_community.add((unknown 0x4300, 0, 2));
         bgp_large_community.add((8283, rejected_route, r_rpki_invalid));
         reject;
-    }
-    else {
-        /* add rfc8097 marker to routes for which no covering ROA exists */
-        bgp_ext_community.add((unknown 0x4300, 0, 1));
     }
 }
 {% endif %}
