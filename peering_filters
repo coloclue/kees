@@ -88,8 +88,11 @@ ixp_map = {}
 router_map = {}
 for ixp in generic['ixp_map']:
     ixp_map[ixp] = {}
-    ixp_map[ixp]['subnets'] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
-                               ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+    if 'ipv6_range' in generic['ixp_map'][ixp]:
+        ixp_map[ixp]['subnets'] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
+                                   ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+    else:
+        ixp_map[ixp]['subnets'] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range'])]
 
     # Set a default bgp_local_pref of 100, allow for IXP based override
     ixp_map[ixp]['bgp_local_pref'] = 100
