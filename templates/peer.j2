@@ -20,7 +20,7 @@ protocol bgp {{ neigh_name }} {
 {%- if block_importexport %}
     export none;
 {%- elif export_full_table %}
-    export where full_table_export({{ asn }});
+    export where full_table_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
 {%- else %}
     export where ebgp_peering_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
 {%- endif %}

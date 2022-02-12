@@ -31,7 +31,7 @@ function allow_graceful_shutdown() {
     }
 }
 
-function ebgp_peering_export(int peerasn, int graceful_shutdown) {
+function ebgp_peering_export(int peerasn; int graceful_shutdown) {
     if ( is_coloclue_supernet()
         || is_coloclue_beacon()
         || (8283, 2) ~ bgp_community
@@ -46,7 +46,7 @@ function ebgp_peering_export(int peerasn, int graceful_shutdown) {
     reject;
 }
 
-function full_table_export(int peerasn) {
+function full_table_export(int peerasn; int graceful_shutdown) {
     if ( is_coloclue_supernet() ) then accept;
     else if ( is_coloclue_more_specific() ) then {
         reject;
