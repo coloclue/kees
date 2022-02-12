@@ -9,6 +9,12 @@
             bgp_path.prepend(8283);
             bgp_path.prepend(8283);
         }
+
+        if (graceful_shutdown = 1) then {
+            # enable the graceful shutdown community
+            bgp_community.add((65535, 0));
+        }
+
         if (   (8283, 204) ~ bgp_community
             || (8283, 303) ~ bgp_community
             || (8283, 4, peerasn) ~ bgp_large_community
@@ -25,7 +31,7 @@ function allow_graceful_shutdown() {
     }
 }
 
-function ebgp_peering_export(int peerasn) {
+function ebgp_peering_export(int peerasn, int graceful_shutdown) {
     if ( is_coloclue_supernet()
         || is_coloclue_beacon()
         || (8283, 2) ~ bgp_community
