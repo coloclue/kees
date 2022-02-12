@@ -213,6 +213,8 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         limit = limits[v]
         neighbor_name = base_repr(int(sha256(str(peer).encode('utf-8')).hexdigest(), 16), 36)[:6]
 
+        graceful_shutdown = generic['bgp'][routername]['graceful_shutdown']
+
         peer_info = {'asn': asn.replace('AS', ''), 'afi': v,
                      'prefix_set': policy_name.replace(':', '_'),
                      'neigh_ip': peer,
@@ -232,7 +234,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'admin_down_state': admin_down_state,
                      'block_importexport': block_importexport,
                      'bgp_local_pref': bgp_local_pref,
-					 'hostname': router
+                     'graceful_shutdown': graceful_shutdown
                      }
 
         peer_config_blob = render('templates/peer.j2', peer_info)
