@@ -231,7 +231,8 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'rpki': generic['rpki'],
                      'admin_down_state': admin_down_state,
                      'block_importexport': block_importexport,
-                     'bgp_local_pref': bgp_local_pref
+                     'bgp_local_pref': bgp_local_pref,
+					 'hostname': router
                      }
 
         peer_config_blob = render('templates/peer.j2', peer_info)
