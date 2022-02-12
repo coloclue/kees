@@ -52,6 +52,9 @@ rpki:
     ipv4:
     ipv6:
 
+ospf:
+  ospf.default_cost: 1000
+
 bfd:
   min_rx_interval: 10
   min_tx_interval: 100
