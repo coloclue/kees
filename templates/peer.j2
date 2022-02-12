@@ -1,3 +1,4 @@
+{%- set short_hostname = hostname.split('.')[0] -%}
 
 protocol bgp {{ neigh_name }} {
     description "{{ description }}";
