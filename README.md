@@ -142,5 +142,5 @@ Authors:
 -------
 
 Copyright (c) 2014-2017, Job Snijders <job@instituut.net>  
-Copyright (c) 2017-2019, Network committee Coloclue <routers@coloclue.net>  
+Copyright (c) 2017-2022, Network committee Coloclue <routers@coloclue.net>  
 Copyright (c) 2020, Imre Jonk <imre@imrejonk.nl>
