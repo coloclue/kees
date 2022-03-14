@@ -1,0 +1,9 @@
+# TODO: this file should provide package version information.
+
+hiyapyco  # https://github.com/zerwes/hiyapyco
+ipaddr  # https://github.com/google/ipaddr-py
+jinja2  # https://jinja.palletsprojects.com/en/master/
+numpy  # https://numpy.org/
+requests  # https://requests.readthedocs.io/en/master/
+rtrsub  # https://github.com/job/rtrsub
+pyyaml  # https://github.com/yaml/pyyaml
