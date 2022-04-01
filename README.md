@@ -61,7 +61,6 @@ Repository layout:
 	├── peering_filters                    <- creates IRR filters & IXP peering configs
 	├── templates
 	│   ├── afi_specific_filters.j2        <- Filters where the AFI is relevant
-	│   ├── bird-rpki.j2                   <- Template used by rtrsub
 	│   ├── ebgp_state.j2                  <- State of the eBGP sessions, toggled by the maintenance-mode setting
 	│   ├── envvars.j2                     <- UID and GID to run the Bird process as
 	│   ├── filter.j2                      <- Filter for peers
