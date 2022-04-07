@@ -31,6 +31,7 @@ prefix set {{ prefix_set }};
 
 {% if graceful_shutdown %}
     bgp_community.add((65535, 0));
+    bgp_local_pref = 0;
 {% endif %}
 
 {% if peer_type == "peer" %}
