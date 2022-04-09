@@ -182,7 +182,7 @@ seen_bird_peers = {}
 def config_snippet(asn, peer, description, ixp, router, no_filter,
                    export_full_table, limits, gtsm, peer_type,
                    multihop, disable_multihop_source_map, multihop_source_map, generic,
-                   admin_down_state, block_importexport, bgp_local_pref):
+                   admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown):
     if peer_type not in ['upstream', 'peer', 'downstream']:
         print("ERROR: invalid peertype: %s for %s" % (peer_type, asn))
         sys.exit(2)
@@ -209,8 +209,6 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
 
         limit = limits[v]
         neighbor_name = base_repr(int(sha256(str(peer).encode('utf-8')).hexdigest(), 16), 36)[:6]
-
-        graceful_shutdown = generic['bgp'][routername]['graceful_shutdown']
 
         peer_info = {'asn': asn.replace('AS', ''), 'afi': v,
                      'prefix_set': policy_name.replace(':', '_'),
@@ -396,4 +394,4 @@ for asn in peerings:
                                        router, no_filter, export_full_table,
                                        limits, gtsm, peer_type, multihop, disable_multihop_source_map,
                                        multihop_source_map, generic,
-                                       admin_down_state, block_importexport, bgp_local_pref)
+                                       admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown)
