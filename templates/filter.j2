@@ -50,7 +50,7 @@ prefix set {{ prefix_set }};
 {% endif %}
 
     include "AS{{ asn }}.prefixset.bird.ipv{{ afi }}";
-    if (net ~ {{ prefix_set }}{% if rpki.validation %} || origin_to_roa({{ asn }}){% endif %}) then {
+    if (net ~ {{ prefix_set }}{% if rpki.validation %} || (8283, 5, 2) ~ bgp_large_community{% endif %}) then {
         bgp_med = 0;
 
 {%- if peer_type == "downstream" %}
@@ -67,13 +67,7 @@ prefix set {{ prefix_set }};
             bgp_community.add((8283, 101));
             bgp_large_community.add((8283, 5, 1));
         }
-{% if rpki.validation %}
-        if (origin_to_roa({{ asn }})) then {
-            bgp_community.add((8283, 102));
-            bgp_large_community.add((8283, 5, 2));
-        }
-{% endif %}
-        accept;
+       accept;
     }
     print "Reject: No IRR? ", net, " ", bgp_path, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
     bgp_large_community.add((8283, rejected_route, r_no_irr));

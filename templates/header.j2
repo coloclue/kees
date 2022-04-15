@@ -32,7 +32,10 @@ include "interfaces.conf";
 include "bfd.conf";
 
 {% if rpki.validation %}
-include "rpki/rpki-{{ afi }}.conf";
+include "/var/lib/rpki-client/bird1{{ afi|replace('ip', '') }}";
+{% if rpki['whitelist'][afi] is not none -%}
+include "rpki/rpkiwhitelist-{{ afi }}.conf";
+{% endif %}
 
 {% endif %}
 include "static_routes-{{ afi }}.conf";
