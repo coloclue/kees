@@ -129,8 +129,8 @@ function reject_rpki_invalid()
     }
     else {% endif %}if (roa_check(ROAS) = ROA_VALID) then {
         /* add rfc8097 marker to routes for which a valid matching ROA exists */
-        bgp_community.add((8283, 103));
-        bgp_large_community.add((8283, 5, 3));
+        bgp_community.add((8283, 102));
+        bgp_large_community.add((8283, 5, 2));
     }
     else if (roa_check(ROAS) = ROA_INVALID) then {
         print "Reject: RPKI ROA check failed for ", net, " ", bgp_path, " protocol: ", proto;
