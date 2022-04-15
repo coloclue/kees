@@ -49,7 +49,7 @@ prefix set {{ prefix_set }};
 {% endif %}
 
     include "AS{{ asn }}.prefixset.bird.ipv{{ afi }}";
-    if (net ~ {{ prefix_set }}) then {
+    if (net ~ {{ prefix_set }}{% if rpki.validation %} || (8283, 5, 2) ~ bgp_large_community{% endif %}) then {
         bgp_med = 0;
 
 {%- if peer_type == "downstream" %}
