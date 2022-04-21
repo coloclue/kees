@@ -15,9 +15,10 @@ template bgp members {
 {%- endif -%}
 
 {%- for profile in members_bgp -%}
+{%- set profile_session_counter = loop.index -%}
 {{ "" }}
 # Begin {{ profile.comment }}
-function member_{{ profile.lid }}_valid() {
+function member_{{ profile.lid }}_{{ profile_session_counter }}_valid() {
     {%- for item in profile.accept -%}
         {%- if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix) -%}
             {%- if item.global == True %}
@@ -35,8 +36,8 @@ function member_{{ profile.lid }}_valid() {
     {% endfor %}
     return false;
 }
-filter member_{{ profile.lid }}_import {
-    if ! member_{{ profile.lid }}_valid() then {
+filter member_{{ profile.lid }}_{{ profile_session_counter }}_import {
+    if ! member_{{ profile.lid }}_{{ profile_session_counter }}_valid() then {
         bgp_large_community.add((8283, rejected_route, r_member_not_auth));
         reject;
     }
@@ -52,7 +53,7 @@ filter member_{{ profile.lid }}_import {
     accept;
 }
 
-filter member_{{ profile.lid }}_export {
+filter member_{{ profile.lid }}_{{ profile_session_counter }}_export {
     {%- if profile.disable_export == True %}
     reject;
     {%- elif profile.only_default == True %}
@@ -75,8 +76,8 @@ protocol bgp member_{{ profile.lid }}_{{ loop.index }} from members {
     description "{{ profile.comment }}";
     neighbor {{ neighbor }} as {{ profile.as }};
     include "ebgp_state.conf";
-    import filter member_{{ profile.lid }}_import;
-    export filter member_{{ profile.lid }}_export;
+    import filter member_{{ profile.lid }}_{{ profile_session_counter }}_import;
+    export filter member_{{ profile.lid }}_{{ profile_session_counter }}_export;
 {%- if profile.lid in members_bgp_source %}
     source address {{ members_bgp_source[profile.lid][afi] }};
 {%- elif members_bgp_source['default'][afi] %}
