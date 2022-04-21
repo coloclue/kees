@@ -72,7 +72,7 @@ filter member_{{ profile.lid }}_{{ profile_session_counter }}_export {
                 {%- for neighbor in sessions -%}
                     {%- if (afi == "ipv4" and "." in neighbor) or (afi == "ipv6" and ":" in neighbor) -%}
 
-protocol bgp member_{{ profile.lid }}_{{ loop.index }} from members {
+protocol bgp member_{{ profile.lid }}_{{ profile_session_counter }} from members {
     description "{{ profile.comment }}";
     neighbor {{ neighbor }} as {{ profile.as }};
     include "ebgp_state.conf";
