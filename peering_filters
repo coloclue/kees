@@ -30,9 +30,7 @@ with open('vars/generic.yml') as genfile:
 def download(url):
     try:
         headers = {"Authorization": "Api-Key " + generic['pdb_apikey']}
-        print(headers)
         r = requests.get(url, headers=headers)
-        print(r)
         downloaded_file = r.text
     except requests.exceptions.RequestException:
         print("Downloading %s failed" % url, file=sys.stderr)
@@ -43,7 +41,6 @@ def download(url):
 
 netixlan = 'https://www.peeringdb.com/api/netixlan'
 pdb_data = json.loads(download(netixlan))
-print(pdb_data)
 
 pdb = {}
 for connection in pdb_data['data']:
