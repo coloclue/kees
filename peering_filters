@@ -24,9 +24,16 @@ import time
 import yaml
 
 
+with open('vars/generic.yml') as genfile:
+    generic = yaml.safe_load(genfile)
+
 def download(url):
     try:
-        downloaded_file = requests.get(url).text
+        headers = {"Authorization": "Api-Key " + generic['pdb_apikey']}
+        print(headers)
+        r = requests.get(url, headers=headers)
+        print(r)
+        downloaded_file = r.text
     except requests.exceptions.RequestException:
         print("Downloading %s failed" % url, file=sys.stderr)
         sys.exit(2)
@@ -34,8 +41,9 @@ def download(url):
     return downloaded_file
 
 
-netixlan = 'https://peeringdb.com/api/netixlan'
+netixlan = 'https://www.peeringdb.com/api/netixlan'
 pdb_data = json.loads(download(netixlan))
+print(pdb_data)
 
 pdb = {}
 for connection in pdb_data['data']:
@@ -49,7 +57,7 @@ for connection in pdb_data['data']:
     if v6:
         pdb[asn].append(v6)
 
-net = 'https://peeringdb.com/api/net'
+net = 'https://www.peeringdb.com/api/net'
 pdb_netdata = json.loads(download(net))
 
 max_prefixes = {}
@@ -74,9 +82,6 @@ if 'all' in sys.argv:
     update_peering = True
 else:
     update_peering = None
-
-with open('vars/generic.yml') as genfile:
-    generic = yaml.safe_load(genfile)
 
 peerings_flat = download(generic['peerings_url'])
 

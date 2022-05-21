@@ -4,6 +4,7 @@ process:
     group: "bird"
 
 peerings_url: https://raw.githubusercontent.com/coloclue/peering/master/peers.yaml
+pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
 bgp_groups:
   "amsix":
