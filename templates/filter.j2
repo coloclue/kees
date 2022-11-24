@@ -42,8 +42,10 @@ prefix set {{ prefix_set }};
     bgp_community.delete((65535, 666));
     bgp_community.add((8283,1)); /* mark peering routes as peering routes */
     bgp_large_community.add((8283, 0, 1)); /* mark peering routes as peering routes */
+{% if ixp_community %}
+    bgp_large_community.add((8283, ixp_route, {{ixp_community}})); /* mark the IXP where the prefix is learned */
 {% endif %}
-
+{% endif %}
 
 {% if rpki.validation %}
     reject_rpki_invalid();

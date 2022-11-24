@@ -209,6 +209,10 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         if asn in generic['bgp_passwords']:
             password = generic['bgp_passwords'][asn]
 
+        ixp_community = None
+        if 'ixp_community' in generic['bgp_groups'][ixp]:
+            ixp_community = generic['bgp_groups'][ixp]['ixp_community']
+
         limit = limits[v]
         neighbor_name = base_repr(int(sha256(str(peer).encode('utf-8')).hexdigest(), 16), 36)[:6]
 
@@ -227,6 +231,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'source': multihop_source_map[router]["ipv%s" % v],
                      'export_full_table': export_full_table,
                      'ixp': ixp,
+                     'ixp_community': ixp_community,
                      'rpki': generic['rpki'],
                      'admin_down_state': admin_down_state,
                      'block_importexport': block_importexport,

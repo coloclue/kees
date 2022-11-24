@@ -122,7 +122,7 @@ users most likely want to run it like this:
 To prepare a Debian machine to build Kees:
 
 ```
-sudo apt install python3-pip bgpq3 jinja2 python-pip
+sudo apt install python3-pip bgpq3 python3-jinja2
 sudo pip3 install rtrsub
 sudo pip3 install numpy
 sudo pip3 install ipaddr

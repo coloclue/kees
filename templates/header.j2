@@ -18,6 +18,7 @@ protocol device {
     scan time 2;
 }
 
+define ixp_route = 8;                   # 8283:8:* contain the peeringdb IXP id
 define rejected_route = 7;              # bgp community 8283:7:* are reject reasons
 define r_coloclue_morespecific = 1;     # A coloclue more specific 
 define r_bogon_aspath = 2;              # a Bogon ASN appeared somewhere in the AS_PATH
