@@ -210,8 +210,8 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
             password = generic['bgp_passwords'][asn]
 
         ixp_community = None
-        if 'ixp_community' in generic['bgp_groups'][ixp]:
-            ixp_community = generic['bgp_groups'][ixp]['ixp_community']
+        if 'ixp_community' in generic['ixp_map'][ixp]:
+            ixp_community = generic['ixp_map'][ixp]['ixp_community']
 
         limit = limits[v]
         neighbor_name = base_repr(int(sha256(str(peer).encode('utf-8')).hexdigest(), 16), 36)[:6]
