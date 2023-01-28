@@ -8,10 +8,12 @@ if [ "${1}" == '-d'-o "${1}" == '--debug']; then
     arguments='debug'
 fi
 
+routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
+
 # generate peer configs
 ./peering_filters "${arguments}"
 
-for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net; do
+for router in ${routers}; do
     rm -rf /opt/router-staging/${router}
     mkdir -p /opt/router-staging/${router}
 
@@ -64,19 +66,19 @@ for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetwor
 
 done
 
-if [ "$1" == "push" ]; then
+if [ "${1}" == "push" ]; then
 
 	# sync config to dcg-1 router
 	eval $(ssh-agent -t 600)
 	ssh-add ~/.ssh/id_rsa_dcg1
 
-    for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net; do
-        echo checking for ${router}
+    for router in ${routers}; do
+        echo "Checking for ${router}"
         bird -c /opt/router-staging/${router}/bird.conf -p
         bird6 -c /opt/router-staging/${router}/bird6.conf -p
     done
 
-    for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net; do
+    for router in ${routers}; do
         echo uploading for ${router}
         rsync -avH --delete /opt/router-staging/${router}/ root@${router}:/etc/bird/
         ssh root@${router} 'chown -R root: /etc/bird; /usr/sbin/birdc configure; /usr/sbin/birdc6 configure' | sed "s/^/${router}: /"
@@ -90,14 +92,14 @@ if [ "$1" == "push" ]; then
 
 	# kill ssh-agent
 	eval $(ssh-agent -k)
-fi
+elif [ "${1}" == "check" ]; then
 
-if [ "$1" == "check" ]; then
-
-    for router in dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net; do
-        echo "checking: /opt/router-staging/${router}/bird.conf"
+    for router in ${routers}; do
+        echo "Checking for ${router}"
         bird -c /opt/router-staging/${router}/bird.conf -p
-        echo "checking: /opt/router-staging/${router}/bird6.conf"
         bird6 -c /opt/router-staging/${router}/bird6.conf -p
     done
+else
+    echo "Command '${1}' not supported" 1>&2
+	exit 1
 fi

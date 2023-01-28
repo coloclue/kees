@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
     KEES
@@ -11,16 +11,9 @@
 """
 
 from jinja2 import Environment, FileSystemLoader
+import argparse
 import hiyapyco
 import os
-import sys
-
-try:
-    import argparse
-except ImportError:
-    print("ERROR: install argparse manually")
-    print("HINT: sudo pip install argparse")
-    sys.exit(2)
 
 
 def render(tpl_path, context):
