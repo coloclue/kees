@@ -285,7 +285,8 @@ for asn in peerings:
             irr_order += "ARIN-WHOIS,REGISTROBR"
 
         generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
-    elif not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and not os.path.isfile('%s.prefixset.bird.ipv6' % asn):
+    elif (not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and
+          not os.path.isfile('%s.prefixset.bird.ipv6' % asn)):
         continue
 
     sessions = []
@@ -368,12 +369,12 @@ for asn in peerings:
                         admin_down_state = False
                         # Is the IXP defined in the bgp_groups settings
                         if ixp in generic['bgp_groups']:
-                            # If if has a admin_down_state setting
+                            # If it has an admin_down_state setting
                             if 'admin_down_state' in generic['bgp_groups'][ixp]:
-                                # Configure it to whatever it is set in the config
+                                # Configure it to whatever it is set to in the config
                                 admin_down_state = \
                                     generic['bgp_groups'][ixp]['admin_down_state']
-                        # If a specific router of a IXP connection is configured
+                        # If a specific router of an IXP connection is configured
                         if ixprouter in generic['bgp_groups']:
                             # If it has a admin_down_state setting, and it hasn't been configured above yet
                             if 'admin_down_state' in \

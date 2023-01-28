@@ -8,7 +8,7 @@ fi
 # generate filters and configs
 ./peering_filters all "${arguments}"
 
-if [ "$(python -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print(a['rpki']['validation']);" < vars/generic.yml)" == "True" ]; then
+if [ "$(python3 -c "import yaml,sys;a = yaml.safe_load(sys.stdin); print(a['rpki']['validation']);" < vars/generic.yml)" == "True" ]; then
     if [ ! -d /opt/routefilters/rpki ] ; then
         mkdir /opt/routefilters/rpki
     fi
