@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ev
 
-if [ "${1}" = '-d' -o "${1}" = '--debug' ]; then
-    arguments=' debug'
+if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
+    arguments='debug'
 fi
 
 # generate filters and configs
