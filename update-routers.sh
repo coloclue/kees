@@ -4,7 +4,7 @@ set -ev
 # Ensure /usr/sbin/bird{,6} are in the path.
 PATH=$PATH:/usr/sbin
 
-if [ "${1}" == '-d'-o "${1}" == '--debug' ]; then
+if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
