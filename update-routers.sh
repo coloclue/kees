@@ -43,6 +43,8 @@ for router in ${routers}; do
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/scrubbers.j2 -o /opt/router-staging/${router}/scrubber-ipv6.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o /opt/router-staging/${router}/via_scrubbers_ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o /opt/router-staging/${router}/via_scrubbers_ipv6.conf
 
     # DCG specific stuff
     if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dcg-2.router.nl.coloclue.net" ]; then
