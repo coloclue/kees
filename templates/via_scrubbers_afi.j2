@@ -1,0 +1,5 @@
+{%- if afi == "ipv4" -%}
+announce_via_scrubber = [ 127.0.0.1/32 ];
+{%- elif afi == "ipv6" -%}
+announce_via_scrubber = [ ::1/128 ];
+{%- endif -%}
