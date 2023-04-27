@@ -48,6 +48,7 @@ jobs:
 
       - name: Build configuration
         run: |
+          ./generate-peer-config.sh
           ./update-routers.sh check
 
       - name: Store generated configuration as artifact
