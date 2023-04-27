@@ -3,7 +3,7 @@ process:
     user: "bird"
     group: "bird"
 
-peerings_url: https://raw.githubusercontent.com/coloclue/kees/master/test/peers.yaml
+peerings_url: https://raw.githubusercontent.com/coloclue/kees/master/tests/peers.yaml
 pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 irr_source_host: rr.ntt.net
 irr_order: NTTCOM,INTERNAL,RADB,RIPE
