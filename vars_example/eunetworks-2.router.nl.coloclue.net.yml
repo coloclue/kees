@@ -5,16 +5,20 @@ router_id: "94.142.247.3"
 
 interfaces:
   backbone:
-    - "eno4"          # Backbone internal: eunetworks-3
-    - "enp5s0f2.108"  # Backbone: Fusix
+    - nic: "lo"         # loopback
+    - nic: "enp1s0f3"   # internal wire to eunetworks-3
+      cost: 100
+      maintenance: False
+    - nic: "eno1.130"   # backbone to dcg-1
+      cost: 200
+      bfd: True
+      maintenance: False
   external:
-    - "lo"
-    - "enp5s0f1.100"  # members vlan
-    - "enp5s0f1.101"  # powerbars
-    - "enp5s0f1.201"  # vlan member 3
-    - "eth5.992"      # Transit
-    - "enp5s0f0"      # IX 3
-    - "enp5s0f2.104"  # Transit
+    - nic: "eno2.100"   # members shared subnet
+    - nic: "eno2.101"   # powerbars
+    - nic: "eno2.203"   # vlan member 3
+    - nic: "enp1s0f2"   # IX 3
+    - nic: "enp1s0f1"   # Transit C
   
 members_bgp_source:
   default:

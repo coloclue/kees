@@ -5,17 +5,21 @@ router_id: "94.142.247.2"
 
 interfaces:
   backbone:
-    - "eth0.706"  # Backbone
-    - "eth2"      # naar dcg-1.router.nl.coloclue.net
+    - nic: "lo"         # loopback
+    - nic: "enp1s0f3"   # internal wire to dcg-1
+      cost: 100
+      maintenance: False
+    - nic: "eno1.130"   # backbone to eunetworks-3
+      cost: 200
+      bfd: True
+      maintenance: False
   external:
-    - "lo"
-    - "eth0.3837" # Transit
-    - "eth0.1001" # IX 3
-    - "eth4.100"  # members shared subnet
-    - "eth4.101"
-    - "eth4.102"
-    - "eth4.201"  # vlan member 1
-    - "eth4.202"  # vlan member 2
+    - nic: "eno2.100"   # members shared subnet
+    - nic: "eno2.101"   # powerbars
+    - nic: "eno2.201"   # vlan member 1
+    - nic: "eno2.202"   # vlan member 2
+    - nic: "enp1s0f2"   # IX 2
+    - nic: "enp1s0f1"   # Transit B
 
 members_bgp_source:
   default:
