@@ -1,0 +1,58 @@
+---
+name: CI
+on:
+  pull_request:
+  push:
+  schedule:
+    # Monday 06:30 UTC
+    - cron: "30 6 * * 1"
+
+jobs:
+  build:
+    name: Build configuration
+    runs-on: ubuntu-latest
+
+    env:
+      BUILDDIR: '/opt/routefilters'
+      STAGEDIR: '/opt/router-staging'
+      PEERINGDB_API_KEY: ${{ secrets.PEERINGDB_API_KEY }}
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install package dependencies
+        run: |
+          sudo apt update
+          sudo apt -y install bgpq3 bird-bgp
+
+      - name: Install Python dependencies
+        run: |
+          pip3 install -r requirements.txt
+
+      - name: Prepare build and staging directories
+        run: |
+          mkdir -p ${BUILDDIR}
+          mkdir -p ${STAGEDIR}
+
+      - name: Use example blobs/vars for building
+        run: |
+          ln -s blobs_example blobs
+          ln -s vars_example vars
+
+      - name: Build configuration
+        run: |
+          ./update-routers.sh check
+
+      - name: Store generated configuration as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: kees-config_as-built
+          path: |
+            ${{ env.BUILDDIR }}/
+            ${{ env.STAGEDIR }}/

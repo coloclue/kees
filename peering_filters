@@ -29,7 +29,8 @@ with open('vars/generic.yml') as genfile:
 
 def download(url):
     try:
-        headers = {"Authorization": "Api-Key " + generic['pdb_apikey']}
+        headers = {"Authorization": "Api-Key " +
+                   os.environ.get('PEERINGDB_API_KEY', generic['pdb_apikey'])}
         r = requests.get(url, headers=headers)
         downloaded_file = r.text
     except requests.exceptions.RequestException:
