@@ -3,8 +3,10 @@ process:
     user: "bird"
     group: "bird"
 
-peerings_url: https://raw.githubusercontent.com/coloclue/peering/master/peers.yaml
+peerings_url: https://raw.githubusercontent.com/coloclue/kees/master/test/peers.yaml
 pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+irr_source_host: rr.ntt.net
+irr_order: NTTCOM,INTERNAL,RADB,RIPE
 
 builddir: '/opt/routefilters'
 stagedir: '/opt/router-staging'
@@ -26,11 +28,23 @@ bgp_groups:
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
-  "asteroid":
+  "frysix":
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
-  "speedix":
+  "decix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "franceix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "swissix":
+    graceful_shutdown: False
+    admin_down_state: False
+    block_importexport: False
+  "private-eun":
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
@@ -48,7 +62,7 @@ coloclue:
       comment: "Coloclue IPv6 PA space"
 
 rpki:
-  validation: true
+  validation: True
   whitelist:
     ipv4:
     ipv6:
@@ -94,26 +108,45 @@ bgp:
 
 ixp_map:
   amsix:
+    ixp_community: 26
     ipv4_range: 80.249.208.0/21
     ipv6_range: 2001:7f8:1::/64
     present_on:
       - eunetworks-2.router.nl.coloclue.net
 #    bgp_local_pref: 100   ## The default bgp_local_pref is 100 if it is not set.
   nlix:
+    ixp_community: 64
     ipv4_range: 193.239.116.0/22
     ipv6_range: 2001:7f8:13::/64
-    bgp_local_pref: 110
     present_on:
       - dcg-1.router.nl.coloclue.net
       - eunetworks-3.router.nl.coloclue.net
-  asteroid:
-    ipv4_range: 185.1.94.0/24
-    ipv6_range: 2001:7f8:b6::/64
+  frysix:
+    ixp_community: 3512
+    ipv4_range: 185.1.203.0/24
+    ipv6_range: 2001:7f8:10f::205b:0/64
+    present_on:
+      - eunetworks-3.router.nl.coloclue.net
+      - dcg-2.router.nl.coloclue.net
+  decix:
+    ixp_community: 31
+    ipv4_range: 80.81.192.0/21
+    ipv6_range: 2001:7f8::/64
+    bgp_local_pref: 90
+    present_on:
+      - eunetworks-3.router.nl.coloclue.net
+  franceix:
+    ixp_community: 359
+    ipv4_range: 37.49.236.0/22
+    ipv6_range: 2001:7f8:54::/64
+    bgp_local_pref: 90
     present_on:
       - dcg-1.router.nl.coloclue.net
-  speedix:
-    ipv4_range: 185.1.95.0/24
-    ipv6_range: 2001:7f8:b7::/64
+  swissix:
+    ixp_community: 60
+    ipv4_range: 91.206.52.0/23
+    ipv6_range: 2001:7f8:24::/64
+    bgp_local_pref: 90
     present_on:
       - dcg-2.router.nl.coloclue.net
   private-eun:
@@ -183,21 +216,30 @@ bogons:
   - prefix: "2001:7f8:1::"
     length: 48
     comment: "IXP: AMS-IX Public Peering LAN"
-  - prefix: "185.1.94.0"
+  - prefix: "185.1.203.0"
     length: 24
-    comment: "IXP: Asteroid Amsterdam Public Peering LAN"
-  - prefix: "2001:7f8:b6::"
+    comment: "IXP: Frys-IX Peering LAN"
+  - prefix: "2001:7f8:10f::"
     length: 64
-    comment: "IXP: Asteroid Amsterdam Public Peering LAN"
-  - prefix: "185.1.95.0"
-    length: 24
-    comment: "IXP: Speed IX Peering LAN"
-  - prefix: "2001:7f8:b7::"
+    comment: "IXP: Frys-IX Peering LAN"
+  - prefix: "80.81.192.0"
+    length: 21
+    comment: "IXP: DE-CIX Frankfurt Peering LAN"
+  - prefix: "2001:7f8::"
     length: 64
-    comment: "IXP: Speed IX Peering LAN"
-  - prefix: "164.138.24.80"
-    length: 29
-    comment: "Tilaa OOB"
+    comment: "IXP: DE-CIX Frankfurt Peering LAN"
+  - prefix: "37.49.236.0"
+    length: 22
+    comment: "IXP: France-IX Paris Peering LAN"
+  - prefix: "2001:7f8:54::"
+    length: 64
+    comment: "IXP: France-IX Paris Peering LAN"
+  - prefix: "91.206.52.0"
+    length: 23
+    comment: "IXP: SwissIX Peering LAN"
+  - prefix: "2001:7f8:24::"
+    length: 64
+    comment: "IXP: SwissIX Peering LAN"
   - prefix: "0000::"
     length: 8
     comment: "loopback, unspecified, v4-mapped"
@@ -220,10 +262,7 @@ bogons:
     length: 4
     comment: "RFC 4291 - Reserved by IETF"
   - prefix: "2001::"
-    length: 33
-    comment: "RFC 4380 - Teredo prefix"
-  - prefix: "2001:0:8000::"
-    length: 33
+    length: 32
     comment: "RFC 4380 - Teredo prefix"
   - prefix: "2001:0002::"
     length: 48
