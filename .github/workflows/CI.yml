@@ -52,6 +52,7 @@ jobs:
           ./update-routers.sh check
 
       - name: Store generated configuration as artifact
+        if: always()  # Also store for failed builds
         uses: actions/upload-artifact@v3
         with:
           name: kees-config_as-built
