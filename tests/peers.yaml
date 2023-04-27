@@ -54,20 +54,20 @@ AS6939:
     import: AS-HURRICANE
     export: "AS8283:AS-COLOCLUE"
     not_on:
-      - decix
-      - franceix
-      - swissix
+        - decix
+        - franceix
+        - swissix
 
 AS15169:
     description: Google
     import: AS-GOOGLE
     export: "AS8283:AS-COLOCLUE"
     not_on:
-      - asteroid
-      - speedix
-      - decix
-      - franceix
-      - swissix
+        - asteroid
+        - speedix
+        - decix
+        - franceix
+        - swissix
 
 AS15562:
     description: Job Snijders
