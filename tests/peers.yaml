@@ -1,0 +1,103 @@
+---
+# Test set for Kees CI pipeline
+# Limit the number of ASNs, but ensure we keep:
+#   * IXP route servers (AS6777, AS34307)
+#   * Blackhole-capable IXP route servers (AS6695)
+#   * Peers we explicitly include/exclude for given IXPs (AS6939)
+#   * Peers we use non-standard AS-SETs with (AS15562)
+#   * Peers that override PeeringDB settings (AS1299, AS3320, AS6453)
+#   * Peers that shouldn't show up in the configuration (AS41441)
+#     + AS41441: since the test config doesn't define speedix as an IXP
+#   * Private peerings (AS1299)
+
+AS1200:
+    description: AMS-IX Office
+    import: AS1200
+    export: "AS8283:AS-COLOCLUE"
+
+AS1299:
+    description: TeliaSonera International Carrier
+    import: AS-TELIANET AS-TELIANET-V6
+    export: "AS8283:AS-COLOCLUE"
+    ipv4_limit: 605000
+    ipv6_limit: 110000
+    ignore_peeringdb: True
+    private_peerings:
+        - 62.115.144.32
+        - 2001:2000:3080:0EBC::1
+
+AS3320:
+    description: Deutsche Telekom
+    import: AS3320:AS-DTAG AS3320:AS-CUSTOMERS-V6
+    export: "AS8283:AS-COLOCLUE"
+    ignore_peeringdb: True
+    only_with:
+        - 80.249.209.211
+        - 2001:7f8:1::a500:3320:1
+
+AS6453:
+    description: Tata
+    import: AS-GLOBEINTERNET
+    export: "AS8283:AS-COLOCLUE"
+    ignore_peeringdb: True
+    only_with:
+        - 80.249.209.167
+        - 2001:7f8:1::a500:6453:1
+
+AS6777:
+    description: AMS-IX Route Servers
+    import: AS6777:AS-AMS-IX-RS AS6777:AS-AMS-IX-RS-V6 AS6777:AS-AMS-IX-RS-SETS AS6777:AS-AMS-IX-RS-SETS-V6
+    export: "AS8283:AS-COLOCLUE"
+
+AS6939:
+    description: Hurricane Electric
+    import: AS-HURRICANE
+    export: "AS8283:AS-COLOCLUE"
+    not_on:
+      - decix
+      - franceix
+      - swissix
+
+AS15169:
+    description: Google
+    import: AS-GOOGLE
+    export: "AS8283:AS-COLOCLUE"
+    not_on:
+      - asteroid
+      - speedix
+      - decix
+      - franceix
+      - swissix
+
+AS15562:
+    description: Job Snijders
+    import: AS15562:AS-SNIJDERS
+    export: ANY
+    type: downstream
+
+AS20562:
+    description: OpenPeering
+    import: AS-OPENPEERING
+    export: "AS8283:AS-COLOCLUE"
+
+AS25091:
+    description: IP-Max SA
+    import: AS-IP-MAX
+    export: "AS8283:AS-COLOCLUE"
+
+AS25182:
+    description: Nederlandse Publieke Omroep - NPO
+    import: AS-PUBLIEKEOMROEP
+    export: AS8283:AS-COLOCLUE
+
+AS34307:
+    description: NL-IX Route Servers
+    import: AS-NL-IX-RS
+    export: "AS8283:AS-COLOCLUE"
+
+AS41441:
+    description: SPEED-IX route server peers
+    import: AS-IX
+    export: AS8283:AS-COLOCLUE
+
+...
