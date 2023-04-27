@@ -6,6 +6,9 @@ process:
 peerings_url: https://raw.githubusercontent.com/coloclue/peering/master/peers.yaml
 pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
+builddir: '/opt/routefilters'
+stagedir: '/opt/router-staging'
+
 bgp_groups:
   "amsix":
     graceful_shutdown: False
