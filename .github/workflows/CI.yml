@@ -6,6 +6,7 @@ on:
   schedule:
     # Monday 06:30 UTC
     - cron: "30 6 * * 1"
+  workflow_dispatch:
 
 jobs:
   build:
