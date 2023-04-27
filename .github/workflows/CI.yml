@@ -46,6 +46,15 @@ jobs:
           ln -s blobs_example blobs
           ln -s vars_example vars
 
+      - name: Create dummy RPKI ROA tables
+        run: |
+          for version in 4 6; do
+            cat <<EOF >/var/lib/rpki-client/bird1v${version}
+            roa table ROAS {
+            }
+            EOF
+          done
+
       - name: Build configuration
         run: |
           ./generate-peer-config.sh
