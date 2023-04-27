@@ -161,6 +161,7 @@ ixp_map:
       - dcg-1.router.nl.coloclue.net
 
 bgp_passwords:
+    AS42: DefibClearOK
     AS112: largecommunities
     AS15169: XXX
 

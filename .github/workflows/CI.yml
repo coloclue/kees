@@ -10,13 +10,12 @@ on:
 
 jobs:
   build:
-    name: Build configuration
+    name: Build Bird configuration
     runs-on: ubuntu-latest
 
     env:
       BUILDDIR: '/opt/routefilters'
       STAGEDIR: '/opt/router-staging'
-      PEERINGDB_API_KEY: ${{ secrets.PEERINGDB_API_KEY }}
 
     steps:
       - name: Check out the code
@@ -48,23 +47,32 @@ jobs:
 
       - name: Create dummy RPKI ROA tables
         run: |
+          sudo mkdir -m 750 -p /var/lib/rpki-client
+          sudo chown -R `whoami` /var/lib/rpki-client
+
           for version in 4 6; do
-            cat <<EOF >/var/lib/rpki-client/bird1v${version}
-            roa table ROAS {
-            }
-            EOF
+          cat <<EOF >/var/lib/rpki-client/bird1v${version}
+          roa table ROAS {
+          }
+          EOF
           done
 
       - name: Build configuration
         run: |
           ./generate-peer-config.sh
           ./update-routers.sh check
+        env:
+          PEERINGDB_API_KEY: ${{ secrets.PEERINGDB_API_KEY }}
+
+      - name: Compress generated artifacts
+        run: >-
+          tar -cpf /tmp/kees-config_as-built-`date -u '+%Y%m%d-%H%M%S%z'`.tar
+          ${{ env.BUILDDIR }}/
+          ${{ env.STAGEDIR }}/
 
       - name: Store generated configuration as artifact
         if: always()  # Also store for failed builds
         uses: actions/upload-artifact@v3
         with:
           name: kees-config_as-built
-          path: |
-            ${{ env.BUILDDIR }}/
-            ${{ env.STAGEDIR }}/
+          path: /tmp/kees-config_as-built-*.tar
