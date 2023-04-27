@@ -1,0 +1,25 @@
+---
+scrubbers:
+  nawas:
+    description: "NBIP Nationale Wasstraat"
+    as: 200020
+    sessions:
+      eunetworks-2:
+        ipv4:
+          - 198.19.254.1
+          - 198.19.254.2
+        ipv6:
+          - 2001:db8:fe::1
+          - 2001:db8:fe::2
+      eunetworks-3:
+        ipv4:
+          - 198.19.253.1
+        ipv6:
+          - 2001:db8:fd::1
+      dcg-1:
+        ipv4:
+          - 198.19.252.1
+        ipv6:
+          - 2a01:db8:fc::1
+
+...
