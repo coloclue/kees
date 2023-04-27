@@ -1,18 +1,19 @@
 ---
 # Test set for Kees CI pipeline
 # Limit the number of ASNs, but ensure we keep:
-#   * IXP route servers (AS6777, AS34307)
+#   * IXP route servers (AS6777, AS34307, AS56393)
 #   * Blackhole-capable IXP route servers (AS6695)
-#   * Peers we explicitly include/exclude for given IXPs (AS6939)
+#   * Peers we explicitly include/exclude for given IXPs (AS6939, AS8298)
 #   * Peers we use non-standard AS-SETs with (AS15562)
 #   * Peers that override PeeringDB settings (AS1299, AS3320, AS6453)
 #   * Peers that shouldn't show up in the configuration (AS41441)
 #     + AS41441: since the test config doesn't define speedix as an IXP
+#   * Peers that are at many shared IXPs (AS42, AS13335, AS32934)
 #   * Private peerings (AS1299)
-
-AS1200:
-    description: AMS-IX Office
-    import: AS1200
+#
+AS42:
+    description: Packet Clearing House
+    import: AS-PCH
     export: "AS8283:AS-COLOCLUE"
 
 AS1299:
@@ -58,6 +59,20 @@ AS6939:
         - franceix
         - swissix
 
+AS8298:
+    description: IPng Networks GmbH
+    import: AS-IPNG
+    export: AS8283:AS-COLOCLUE
+    not_on:
+        #- decix
+        - franceix
+        #- swissix
+
+AS13335:
+    description: Cloudflare
+    import: AS-CLOUDFLARE
+    export: "AS8283:AS-COLOCLUE"
+
 AS15169:
     description: Google
     import: AS-GOOGLE
@@ -80,6 +95,11 @@ AS20562:
     import: AS-OPENPEERING
     export: "AS8283:AS-COLOCLUE"
 
+AS24940:
+    description: Hetzner Online GmbH
+    import: AS-Hetzner
+    export: AS8283:AS-COLOCLUE
+
 AS25091:
     description: IP-Max SA
     import: AS-IP-MAX
@@ -90,6 +110,11 @@ AS25182:
     import: AS-PUBLIEKEOMROEP
     export: AS8283:AS-COLOCLUE
 
+AS32934:
+    description: Facebook
+    import: AS-FACEBOOK
+    export: "AS8283:AS-COLOCLUE"
+
 AS34307:
     description: NL-IX Route Servers
     import: AS-NL-IX-RS
@@ -98,6 +123,11 @@ AS34307:
 AS41441:
     description: SPEED-IX route server peers
     import: AS-IX
+    export: AS8283:AS-COLOCLUE
+
+AS56393:
+    description: Frys-IX Route Servers
+    import: AS-FRYS-IX-CONNECTED
     export: AS8283:AS-COLOCLUE
 
 ...
