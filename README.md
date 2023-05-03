@@ -81,7 +81,7 @@ Repository layout:
 	    ├── eunetworks-2.router.nl.coloclue.net.yml
 	    ├── generic.yml                    <- generic KEES settings and inventory for routers and IXPs
 	    ├── members_bgp.yml                <- ips & prefixes of members with BGP
-	    ├── statics-dcg.yml                <- static routes NorthC (f.k.a. DCG)
+	    ├── statics-dcg.yml                <- static routes DCG
 	    ├── statics-eunetworks.yml         <- static routes euNetworks
 	    ├── scrubbers.yml                  <- DDoS scrubber neighbours
 	    └── transit.yml                    <- transit eBGP neighbours
