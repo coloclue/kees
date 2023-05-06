@@ -25,3 +25,4 @@ else
     rm -f ${BUILDDIR}/rpki/rpki-ipv4.conf
     rm -f ${BUILDDIR}/rpki/rpki-ipv6.conf
 fi
+ 
