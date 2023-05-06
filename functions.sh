@@ -17,4 +17,3 @@ function getconfig () {
     echo ${default}
     return
 }
- 
