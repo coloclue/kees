@@ -90,7 +90,7 @@ Dependencies:
 -------------
 
     bgpq3 - http://snar.spb.ru/prog/bgpq3/
-    BIRD 1.6 - https://bird.network.cz/
+    BIRD 2 - https://bird.network.cz/
     OpenSSH client - https://www.openssh.com/
     PHP - https://www.php.net/  # TODO: what's the minimum supported version?
     Python 3 - https://www.python.org/  # TODO: what's the minimum supported version?
@@ -98,11 +98,14 @@ Dependencies:
 
 You will also need the Python packages in `requirements.txt`.
 
-Most dependencies can be installed on Debian with `# apt install bgpq3 bird
+Most dependencies can be installed on Debian with `# apt install bgpq3 bird2
 openssh-client php python3-jinja2 python3-numpy python3-requests python3-yaml
 rsync`. Some of the Python dependencies can't be found in the Debian
 repository. You can use [pip](https://pip.pypa.io/en/stable/) to install them:
 `$ pip3 install -r requirements.txt`.
+
+BIRD 2 has IPv4 and IPv6 support in the same process, although Kees isn't build for this.
+It is required to use a second process for IPv6, which uses the bird6.conf config file.
 
 Usage:
 ------
