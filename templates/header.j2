@@ -33,7 +33,7 @@ include "interfaces.conf";
 include "bfd.conf";
 
 {% if rpki.validation %}
-include "/var/lib/rpki-client/bird1{{ afi|replace('ip', '') }}";
+include "/var/lib/rpki-client/bird";
 {% if rpki['whitelist'][afi] is not none -%}
 include "rpki/rpkiwhitelist-{{ afi }}.conf";
 {% endif %}

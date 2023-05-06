@@ -76,8 +76,10 @@ protocol bgp member_{{ profile.lid }}_{{ profile_session_counter }}_{{ loop.inde
     description "{{ profile.comment }}";
     neighbor {{ neighbor }} as {{ profile.as }};
     include "ebgp_state.conf";
-    import filter member_{{ profile.lid }}_{{ profile_session_counter }}_import;
-    export filter member_{{ profile.lid }}_{{ profile_session_counter }}_export;
+	{{ afi }} {
+        import filter member_{{ profile.lid }}_{{ profile_session_counter }}_import;
+        export filter member_{{ profile.lid }}_{{ profile_session_counter }}_export;
+    };
 {%- if profile.lid in members_bgp_source %}
     source address {{ members_bgp_source[profile.lid][afi] }};
 {%- elif members_bgp_source['default'][afi] %}

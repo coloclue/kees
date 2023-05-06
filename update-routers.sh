@@ -86,14 +86,14 @@ if [ "${1}" == "push" ]; then
 
     for router in ${routers}; do
         echo "Checking for ${router}"
-        bird -c ${STAGEDIR}/${router}/bird.conf -p
-        bird6 -c ${STAGEDIR}/${router}/bird6.conf -p
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird.conf
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird6.conf
     done
 
     for router in ${routers}; do
         echo uploading for ${router}
         rsync -avH --delete ${STAGEDIR}/${router}/ root@${router}:/etc/bird/
-        ssh root@${router} 'chown -R root: /etc/bird; /usr/sbin/birdc configure; /usr/sbin/birdc6 configure' | sed "s/^/${router}: /"
+        ssh root@${router} 'chown -R root: /etc/bird; /usr/sbin/birdc configure; /usr/local/bin/birdc6 configure' | sed "s/^/${router}: /"
     done
 
     # kill ssh-agent
@@ -108,8 +108,8 @@ elif [ "${1}" == "check" ]; then
 
     for router in ${routers}; do
         echo "Checking for ${router}"
-        bird -c ${STAGEDIR}/${router}/bird.conf -p
-        bird6 -c ${STAGEDIR}/${router}/bird6.conf -p
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird.conf
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird6.conf
     done
 else
     echo "Command '${1}' not supported" 1>&2

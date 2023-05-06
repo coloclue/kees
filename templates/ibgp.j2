@@ -1,30 +1,32 @@
 template bgp ibgp {
     local as 8283;
-    import filter {
-        # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
-        allow_graceful_shutdown();
+	{{ afi }} {
+        import filter {
+            # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
+            allow_graceful_shutdown();
 
-        # RFC 7999
-        if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
+            # RFC 7999
+            if (65535, 666) ~ bgp_community then dest = RTD_BLACKHOLE;
 
-        # the rest
-        accept;
-    };
-    export filter {
-        if proto = "blackhole1" then {
-            bgp_community.add((65535,666));
+            # the rest
             accept;
-        }
-        if dest = RTD_BLACKHOLE then {
-            reject;
-        }
+        };
+        export filter {
+            if proto = "blackhole1" then {
+                bgp_community.add((65535,666));
+                accept;
+            }
+            if dest = RTD_BLACKHOLE then {
+                reject;
+            }
 
-        # Filter out OSPF and Loopbacks
-        not_ospf_export();
+            # Filter out OSPF and Loopbacks
+            not_ospf_export();
 
-        accept;
+            accept;
+        };
+        next hop self;
     };
-    next hop self;
     #bfd on;
 }
 

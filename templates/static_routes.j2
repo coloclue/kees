@@ -1,4 +1,5 @@
 protocol static {
+    {{ afi }};
 {%- for static in statics
     if (":" in static.route and afi == "ipv6")
     or ("." in static.route and afi == "ipv4")
@@ -13,6 +14,7 @@ protocol static {
 }
 
 protocol static static_default {
+    {{ afi }};
 {%- if afi == "ipv4" %}
     route 0.0.0.0/0 blackhole;
 {% elif afi == "ipv6" %}

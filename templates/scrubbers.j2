@@ -16,9 +16,11 @@ protocol bgp scrubber_{{ scrubber }}_{{ loop.index }} {
     description "{{ scrubberinfo.description }}";
     local as 8283;
     neighbor {{ neighbor }} as {{ scrubberinfo['as'] }};
-    import keep filtered;
-    import none;
-    export filter via_scrubber;
+    {{ afi }} {
+        import keep filtered;
+        import none;
+        export filter via_scrubber;
+    };
 }
 {% endfor -%}
 		{%- endif -%}
