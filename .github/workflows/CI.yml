@@ -29,7 +29,7 @@ jobs:
       - name: Install package dependencies
         run: |
           sudo apt update
-          sudo apt -y install bgpq3 bird-bgp
+          sudo apt -y install bgpq3 bird2
 
       - name: Install Python dependencies
         run: |
@@ -50,12 +50,17 @@ jobs:
           sudo mkdir -m 750 -p /var/lib/rpki-client
           sudo chown -R `whoami` /var/lib/rpki-client
 
-          for version in 4 6; do
-          cat <<EOF >/var/lib/rpki-client/bird1v${version}
-          roa table ROAS {
+          cat <<EOF >/var/lib/rpki-client/bird
+          define force_roa_table_update = 1683397799;
+          roa4 table ROAS4;
+          roa6 table ROAS6;
+          protocol static {
+              roa4 { table ROAS4; };
+          }
+          protocol static {
+              roa6 { table ROAS6; };
           }
           EOF
-          done
 
       - name: Build configuration
         run: |
