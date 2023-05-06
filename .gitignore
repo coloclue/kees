@@ -10,6 +10,9 @@ nbproject/
 # Ignore the Python virtual enviroment build by PyCharm
 venv/
 
+# Ignore any local virtualenv
+virtualenv/
+
 # Prevent the blobs and vars directories from being added ever
 /blobs/*
 /vars/*

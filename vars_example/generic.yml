@@ -8,6 +8,9 @@ pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 irr_source_host: rr.ntt.net
 irr_order: NTTCOM,INTERNAL,RADB,RIPE
 
+builddir: '/opt/routefilters'
+stagedir: '/opt/router-staging'
+
 bgp_groups:
   "amsix":
     graceful_shutdown: False

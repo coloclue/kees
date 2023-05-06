@@ -126,10 +126,16 @@ allow_upto = {
 # this is used to find template files
 launchdir = os.getcwd()
 
+# get output dir from environment, configuration or hard-coded default.
 try:
-    os.chdir('/opt/routefilters/')
+    outputdir = os.environ['BUILDDIR']
+except KeyError:
+    outputdir = generic['builddir'] if 'builddir' in generic.keys() else '/opt/routefilters'
+
+try:
+    os.chdir(outputdir)
 except IOError:
-    print("/opt/routefilters/ does not exist?")
+    print("%s does not exist?" % outputdir)
     sys.exit(2)
 
 if 'irr_source_host' in generic:
