@@ -2,12 +2,14 @@
 
 template bgp members {
     local as 8283;
-    export all;
-    import keep filtered;
-    import none;
-    next hop self;
-    import limit 100 action restart;
 	default bgp_local_pref 500;
+	{{ afi }} {
+        export all;
+        import keep filtered;
+        import none;
+        next hop self;
+        import limit 100 action restart;
+    };
 }
 {{ "" }}
 {%- if afi == "ipv4" -%}{%- set max_length = 32 -%}

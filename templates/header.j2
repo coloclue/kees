@@ -9,9 +9,11 @@ router id {{ router_id }};
 
 protocol kernel {
     scan time 20;
-    device routes;
+    #device routes;
     learn on;
-    export all;
+    {{ afi }} {
+        export all;
+    };
 }
 
 protocol device {
@@ -45,7 +47,7 @@ include "{{ afi }}_filters.conf";
 
 include "generic_filters.conf";
 
-include "ospf.conf";
+include "ospf-{{ afi }}.conf";
 
 include "ibgp-{{ afi }}.conf";
 

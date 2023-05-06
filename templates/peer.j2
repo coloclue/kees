@@ -4,14 +4,14 @@ protocol bgp {{ neigh_name }} {
     neighbor {{ neigh_ip }} as {{ asn }};
     include "../ebgp_state.conf";
     local as 8283;
-    next hop self;
-{%- if limit is greaterthan 0 %}
-    receive limit {{ limit }} action restart;
-{%- endif %}
 {%- if bgp_local_pref is defined %}
     default bgp_local_pref {{ bgp_local_pref }};
 {%- endif %}
     ipv{{ afi|replace('ipv', '') }} {
+        next hop self;
+{%- if limit is greaterthan 0 %}
+        receive limit {{ limit }} action restart;
+{%- endif %}
         import keep filtered;
 {%- if block_importexport %}
         import none;

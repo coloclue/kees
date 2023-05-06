@@ -1,6 +1,6 @@
-template bgp ibgp {
+template bgp kees_ibgp {
     local as 8283;
-	{{ afi }} {
+    {{ afi }} {
         import filter {
             # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
             allow_graceful_shutdown();
@@ -31,7 +31,7 @@ template bgp ibgp {
 }
 
 {%- for neighbor in bgp if not neighbor == shortname %}
-protocol bgp ibgp_{{ neighbor }} from ibgp {
+protocol bgp ibgp_{{ neighbor }} from kees_ibgp {
     neighbor {{ bgp[neighbor][afi] }} as 8283;
     source address {{ bgp[shortname][afi] }};
 {%- if 'maintenance_mode' in bgp[neighbor] %}

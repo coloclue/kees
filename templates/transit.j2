@@ -3,10 +3,12 @@
 
 template bgp transit {
     local as 8283;
-    import none;
-    import keep filtered;
-    export none;
-    next hop self;
+	{{ afi }} {
+        import none;
+        import keep filtered;
+        export none;
+        next hop self;
+    };
 }
 
 function transit_import(int transit_tag)
