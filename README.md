@@ -104,7 +104,7 @@ rsync`. Some of the Python dependencies can't be found in the Debian
 repository. You can use [pip](https://pip.pypa.io/en/stable/) to install them:
 `$ pip3 install -r requirements.txt`.
 
-BIRD 2 has IPv4 and IPv6 support in the same process, although Kees isn't build for this.
+BIRD 2 has IPv4 and IPv6 support in the same process, although Kees isn't built for this.
 It is required to use a second process for IPv6, which uses the bird6.conf config file.
 
 Usage:
