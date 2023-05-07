@@ -9,10 +9,10 @@ router id {{ router_id }};
 
 protocol kernel {
     scan time 20;
-    #device routes;
-    learn on;
+    learn off;
     {{ afi }} {
-        export all;
+        import none;
+        export where source != RTS_DEVICE;
     };
 }
 
