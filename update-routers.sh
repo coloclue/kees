@@ -25,7 +25,7 @@ echo Staging files in \'${STAGEDIR}\'
 
 for router in ${routers}; do
     rm -rf ${STAGEDIR}/${router}
-    mkdir -p ${STAGEDIR}/${router}
+    mkdir -p ${STAGEDIR}/${router} 
 
     ./gentool -y vars/generic.yml -t templates/envvars.j2 -o ${STAGEDIR}/${router}/envvars
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/ebgp_state.j2 -o ${STAGEDIR}/${router}/ebgp_state.conf
