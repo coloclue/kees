@@ -11,7 +11,7 @@ protocol ospf v3 ospf1 {
 {%- for interface in interfaces['backbone'] %}
 	{%- if interface.nic == 'lo' %}
         interface "{{ interface.nic }}";
-    {%- elif interface.nic is regex('loop\d+') %}
+        {%- elif interface.nic is regex('loop\d+') %}
         interface "{{ interface.nic }}" {
             stub yes;
         };
