@@ -32,7 +32,8 @@ for router in ${routers}; do
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o ${STAGEDIR}/${router}/header-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o ${STAGEDIR}/${router}/header-ipv6.conf
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd-ipv6.conf
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o ${STAGEDIR}/${router}/ospf-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o ${STAGEDIR}/${router}/ospf-ipv6.conf
 

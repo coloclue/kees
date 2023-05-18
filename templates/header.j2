@@ -32,7 +32,7 @@ define r_member_not_auth = 7;           # Coloclue member is not authorized to a
 
 include "interfaces.conf";
 
-include "bfd.conf";
+include "bfd-{{ afi }}.conf";
 
 {% if rpki.validation %}
 include "/var/lib/rpki-client/bird";
