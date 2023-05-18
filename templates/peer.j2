@@ -42,7 +42,7 @@ protocol bgp {{ neigh_name }} {
     disabled;
 {%- endif %}
 {%- if graceful_shutdown %}
-    preference 0;
+    default bgp_local_pref 0;
 {%- endif %}
 }
 

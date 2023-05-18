@@ -36,7 +36,7 @@ protocol bgp ibgp_{{ neighbor }} from kees_ibgp {
     source address {{ bgp[shortname][afi] }};
 {%- if 'maintenance_mode' in bgp[neighbor] %}
 {%- if bgp[neighbor]['maintenance_mode'] %}
-    preference 0;
+    default bgp_local_pref 0;
 {%- endif %}
 {%- endif %}
 }
