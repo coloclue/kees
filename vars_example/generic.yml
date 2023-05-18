@@ -13,9 +13,9 @@ stagedir: '/opt/router-staging'
 
 bgp_groups:
   "amsix":
-    graceful_shutdown: False
+    graceful_shutdown: True
     admin_down_state: False
-    block_importexport: False
+    block_importexport: True
   "nlix":
     graceful_shutdown: False
     admin_down_state: False
@@ -82,7 +82,7 @@ bgp:
     ipv4: 94.142.247.3
     ipv6: 2a02:898:0:300::3
     vendor: bird
-    graceful_shutdown: false
+    graceful_shutdown: True
     maintenance_mode: false
   "eunetworks3":
     fqdn: eunetworks-3.router.nl.coloclue.net
