@@ -14,13 +14,27 @@ from jinja2 import Environment, FileSystemLoader
 import argparse
 import hiyapyco
 import os
+import re
+
+# Allow regex matching in templates
+def is_regex_match(value='', pattern='', ignorecase=False, multiline=False, match_type='search'):
+    flags = 0
+    if ignorecase:
+        flags |= re.I
+    if multiline:
+        flags |= re.M
+    _regex = re.compile(pattern, flags=flags)
+    return bool(getattr(_regex, match_type, 'search')(value))
 
 
 def render(tpl_path, context):
     path, filename = os.path.split(tpl_path)
-    return Environment(
+
+    env = Environment(
         loader=FileSystemLoader(path or './')
-    ).get_template(filename).render(context)
+    )
+    env.tests['regex'] = is_regex_match
+    return env.get_template(filename).render(context)
 
 
 def main():
