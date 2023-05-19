@@ -41,7 +41,8 @@ for router in ${routers}; do
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o ${STAGEDIR}/${router}/ibgp-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o ${STAGEDIR}/${router}/ibgp-ipv6.conf
 
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces-ipv6.conf
 
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/generic_filters.j2 -o ${STAGEDIR}/${router}/generic_filters.conf
 
