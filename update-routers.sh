@@ -10,8 +10,8 @@ fi
 
 #routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 # 20230414 Temp move of eunetworks-2 to the back, because of the VPP tests
-#dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net 
-routers='eunetworks-3.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net'
+# dcg-2.router.nl.coloclue.net 
+routers='eunetworks-3.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net dcg-1.router.nl.coloclue.net'
 
 . functions.sh
 
