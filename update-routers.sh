@@ -10,7 +10,7 @@ fi
 
 #routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 # 20230518 For Bird2 testing, remove eunetworks-2+3 for now
-routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net'
+routers='dcg-2.router.nl.coloclue.net'
 
 . functions.sh
 
