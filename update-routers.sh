@@ -9,7 +9,6 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
 fi
 
 #routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
-# 20230414 Temp move of eunetworks-2 to the back, because of the VPP tests
 routers='dcg-1.router.nl.coloclue.net  dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 
 . functions.sh
