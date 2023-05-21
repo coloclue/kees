@@ -90,7 +90,7 @@ Dependencies:
 -------------
 
     bgpq3 - http://snar.spb.ru/prog/bgpq3/
-    BIRD 2 - https://bird.network.cz/
+    BIRD 2 - https://bird.network.cz/ # minimum version is 2.0.8
     OpenSSH client - https://www.openssh.com/
     PHP - https://www.php.net/  # TODO: what's the minimum supported version?
     Python 3 - https://www.python.org/  # TODO: what's the minimum supported version?
