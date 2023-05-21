@@ -4,26 +4,28 @@ protocol bgp {{ neigh_name }} {
     neighbor {{ neigh_ip }} as {{ asn }};
     include "../ebgp_state.conf";
     local as 8283;
-    next hop self;
-{%- if limit is greaterthan 0 %}
-    receive limit {{ limit }} action restart;
-{%- endif %}
-    import keep filtered;
-{%- if block_importexport %}
-    import none;
-{%- else %}
-    import filter {{ filter_name }};
-{%- endif %}
 {%- if bgp_local_pref is defined %}
     default bgp_local_pref {{ bgp_local_pref }};
 {%- endif %}
-{%- if block_importexport %}
-    export none;
-{%- elif export_full_table %}
-    export where full_table_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
-{%- else %}
-    export where ebgp_peering_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
+    ipv{{ afi|replace('ipv', '') }} {
+        next hop self;
+{%- if limit is greaterthan 0 %}
+        receive limit {{ limit }} action restart;
 {%- endif %}
+        import keep filtered;
+{%- if block_importexport %}
+        import none;
+{%- else %}
+        import filter {{ filter_name }};
+{%- endif %}
+{%- if block_importexport %}
+        export none;
+{%- elif export_full_table %}
+        export where full_table_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
+{%- else %}
+        export where ebgp_peering_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
+{%- endif %}
+    };
 {%- if password %}
     password "{{ password }}";
 {%- endif %}
@@ -40,7 +42,7 @@ protocol bgp {{ neigh_name }} {
     disabled;
 {%- endif %}
 {%- if graceful_shutdown %}
-    preference 0;
+    default bgp_local_pref 0;
 {%- endif %}
 }
 

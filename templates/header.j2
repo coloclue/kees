@@ -9,9 +9,11 @@ router id {{ router_id }};
 
 protocol kernel {
     scan time 20;
-    device routes;
-    learn on;
-    export all;
+    learn off;
+    {{ afi }} {
+        import none;
+        export where source != RTS_DEVICE;
+    };
 }
 
 protocol device {
@@ -28,12 +30,12 @@ define r_unacceptable_pfxlen = 5;       # The route has an unacceptable large or
 define r_no_irr = 6;                    # No IRR object covers the route
 define r_member_not_auth = 7;           # Coloclue member is not authorized to announce this
 
-include "interfaces.conf";
+include "interfaces-{{ afi }}.conf";
 
-include "bfd.conf";
+include "bfd-{{ afi }}.conf";
 
 {% if rpki.validation %}
-include "/var/lib/rpki-client/bird1{{ afi|replace('ip', '') }}";
+include "/var/lib/rpki-client/bird";
 {% if rpki['whitelist'][afi] is not none -%}
 include "rpki/rpkiwhitelist-{{ afi }}.conf";
 {% endif %}
@@ -45,7 +47,7 @@ include "{{ afi }}_filters.conf";
 
 include "generic_filters.conf";
 
-include "ospf.conf";
+include "ospf-{{ afi }}.conf";
 
 include "ibgp-{{ afi }}.conf";
 

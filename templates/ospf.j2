@@ -1,10 +1,20 @@
-protocol ospf ospf1 {
-    import all;
-    export filter ospf_export;
+{%- if afi == "ipv4" %}
+protocol ospf v2 ospf1 {
+{%- elif afi == "ipv6" %}
+protocol ospf v3 ospf1 {
+{%- endif %}
+    {{ afi }} {
+        import all;
+        export filter ospf_export;
+    };
     area 0.0.0.0 {
 {%- for interface in interfaces['backbone'] %}
 	{%- if interface.nic == 'lo' %}
         interface "{{ interface.nic }}";
+        {%- elif interface.nic is regex('loop\d+') %}
+        interface "{{ interface.nic }}" {
+            stub yes;
+        };
 	{%- else %}
         interface "{{ interface.nic }}" {
 		{%- if 'maintenance_mode' in bgp[shortname] and bgp[shortname]['maintenance_mode'] %}

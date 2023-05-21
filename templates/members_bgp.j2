@@ -2,12 +2,14 @@
 
 template bgp members {
     local as 8283;
-    export all;
-    import keep filtered;
-    import none;
-    next hop self;
-    import limit 100 action restart;
 	default bgp_local_pref 500;
+	{{ afi }} {
+        export all;
+        import keep filtered;
+        import none;
+        next hop self;
+        import limit 100 action restart;
+    };
 }
 {{ "" }}
 {%- if afi == "ipv4" -%}{%- set max_length = 32 -%}
@@ -76,8 +78,10 @@ protocol bgp member_{{ profile.lid }}_{{ profile_session_counter }}_{{ loop.inde
     description "member {{ profile.lid }}";
     neighbor {{ neighbor }} as {{ profile.as }};
     include "ebgp_state.conf";
-    import filter member_{{ profile.lid }}_{{ profile_session_counter }}_import;
-    export filter member_{{ profile.lid }}_{{ profile_session_counter }}_export;
+	{{ afi }} {
+        import filter member_{{ profile.lid }}_{{ profile_session_counter }}_import;
+        export filter member_{{ profile.lid }}_{{ profile_session_counter }}_export;
+    };
 {%- if profile.lid in members_bgp_source %}
     source address {{ members_bgp_source[profile.lid][afi] }};
 {%- elif members_bgp_source['default'][afi] %}

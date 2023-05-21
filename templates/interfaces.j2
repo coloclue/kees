@@ -1,4 +1,6 @@
 protocol direct {
+    {{ afi }};
+
     # backbone
     {%- for interface in interfaces['backbone'] %}
     interface "{{ interface.nic }}";

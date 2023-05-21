@@ -8,11 +8,8 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
-exit 0
-
 #routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
-# 20230518 For Bird2 testing, remove eunetworks-2+3 for now
-routers='dcg-2.router.nl.coloclue.net'
+routers='dcg-1.router.nl.coloclue.net  dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 
 . functions.sh
 
@@ -34,13 +31,16 @@ for router in ${routers}; do
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o ${STAGEDIR}/${router}/header-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/header.j2 -o ${STAGEDIR}/${router}/header-ipv6.conf
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd.conf
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o ${STAGEDIR}/${router}/ospf.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/bfd.j2 -o ${STAGEDIR}/${router}/bfd-ipv6.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o ${STAGEDIR}/${router}/ospf-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/ospf.j2 -o ${STAGEDIR}/${router}/ospf-ipv6.conf
 
     ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o ${STAGEDIR}/${router}/ibgp-ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/ibgp.j2 -o ${STAGEDIR}/${router}/ibgp-ipv6.conf
 
-    ./gentool -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces.conf
+    ./gentool -4 -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces-ipv4.conf
+    ./gentool -6 -y vars/generic.yml vars/${router}.yml -t templates/interfaces.j2 -o ${STAGEDIR}/${router}/interfaces-ipv6.conf
 
     ./gentool -y vars/generic.yml vars/${router}.yml -t templates/generic_filters.j2 -o ${STAGEDIR}/${router}/generic_filters.conf
 
@@ -88,14 +88,14 @@ if [ "${1}" == "push" ]; then
 
     for router in ${routers}; do
         echo "Checking for ${router}"
-        bird -c ${STAGEDIR}/${router}/bird.conf -p
-        bird6 -c ${STAGEDIR}/${router}/bird6.conf -p
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird.conf
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird6.conf
     done
 
     for router in ${routers}; do
         echo uploading for ${router}
         rsync -avH --delete ${STAGEDIR}/${router}/ root@${router}:/etc/bird/
-        ssh root@${router} 'chown -R root: /etc/bird; /usr/sbin/birdc configure; /usr/sbin/birdc6 configure' | sed "s/^/${router}: /"
+        ssh root@${router} 'chown -R root: /etc/bird; /usr/sbin/birdc configure; /usr/local/bin/birdc6 configure' | sed "s/^/${router}: /"
     done
 
     # kill ssh-agent
@@ -110,8 +110,8 @@ elif [ "${1}" == "check" ]; then
 
     for router in ${routers}; do
         echo "Checking for ${router}"
-        bird -c ${STAGEDIR}/${router}/bird.conf -p
-        bird6 -c ${STAGEDIR}/${router}/bird6.conf -p
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird.conf
+        /usr/sbin/bird -p -c ${STAGEDIR}/${router}/bird6.conf
     done
 else
     echo "Command '${1}' not supported" 1>&2

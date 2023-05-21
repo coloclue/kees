@@ -3,10 +3,12 @@
 
 template bgp transit {
     local as 8283;
-    import none;
-    import keep filtered;
-    export none;
-    next hop self;
+	{{ afi }} {
+        import none;
+        import keep filtered;
+        export none;
+        next hop self;
+    };
 }
 
 function transit_import(int transit_tag)
@@ -136,16 +138,18 @@ protocol bgp transit_{{ profile_name }}_{{ loop.index }} from transit {
     description "{{ profile.name }} session {{ loop.index }}";
     neighbor {% if afi == 'ipv4' -%}{{ session.ip4 }}{%- else -%}{{ session.ip6 }}{%- endif %} as {{ profile.as }};
     include "ebgp_state.conf";
-    {% if profile['block_importexport'] or session['block_importexport'] -%}
-    import none;
-    export none;
-    {%- else -%}
-    import where transit_import({{ profile.tag }});
-    export where transit_{{ profile_name }}_export({%- if bgp[short_hostname|replace('-', '')]['graceful_shutdown'] or profile['graceful_shutdown'] or session['graceful_shutdown'] -%}1{%- else -%}0{%- endif -%});
-    {%- endif %}
     {% if session['bgp_local_pref'] is defined -%}
     default bgp_local_pref {{ session['bgp_local_pref'] }};
     {%- endif %}
+    {{ afi }} {
+        {% if profile['block_importexport'] or session['block_importexport'] -%}
+        import none;
+        export none;
+        {%- else -%}
+        import where transit_import({{ profile.tag }});
+        export where transit_{{ profile_name }}_export({%- if bgp[short_hostname|replace('-', '')]['graceful_shutdown'] or profile['graceful_shutdown'] or session['graceful_shutdown'] -%}1{%- else -%}0{%- endif -%});
+        {%- endif %}
+    };
     {% if profile['admin_down_state'] or session['admin_down_state'] -%}
     disabled;
     {%- endif %}
