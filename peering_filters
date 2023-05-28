@@ -77,22 +77,21 @@ for netdata in pdb_netdata['data']:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
 
 # Defaults
+generate_configs = False
 generate_prefixsets = False
-generate_configs = True
 debugmode = False
 do_checks = True
 
 if 'all' in sys.argv:
+    generate_configs = True
     generate_prefixsets = True
-if '--no-prefixsets' in sys.argv:
-    generate_prefixsets = False
-    print("Saw '--no-prefixsets': not generating/updating prefix sets.")
-if '--no-configs' in sys.argv:
-    generate_configs = False
-    print("Saw '--no-configs': not generating/updating peering configuration.")
+if 'prefixsets' in sys.argv:
+    generate_prefixsets = True
+if 'configs' in sys.argv:
+    generate_configs = True
 if '--no-checks' in sys.argv:
     do_checks = False
-    print("Saw 'no-checks': not checking for existing prefixsets before generating configuration.")
+    print("Saw '--no-checks': skipping existence checks for prefix sets when generating config.")
 if 'debug' in sys.argv:
     debugmode = True
 

@@ -20,7 +20,7 @@ STAGEDIR=${STAGEDIR:-`getconfig 'stagedir' '/opt/router-staging'`}
 echo Staging files in \'${STAGEDIR}\'
 
 # generate peer configs
-./peering_filters "${arguments}"
+./peering_filters configs "${arguments}"
 
 for router in ${routers}; do
     rm -rf ${STAGEDIR}/${router}
