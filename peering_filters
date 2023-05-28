@@ -79,7 +79,7 @@ for netdata in pdb_netdata['data']:
 # By default, update only filters
 update_peering = False
 update_filters = True
-debug_mode = False
+debugmode = False
 
 if 'all' in sys.argv:
     update_peering = True
