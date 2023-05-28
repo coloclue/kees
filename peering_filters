@@ -76,15 +76,23 @@ for netdata in pdb_netdata['data']:
         else:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
 
+# By default, update only filters
+update_peering = False
+update_filters = True
+debug_mode = False
+
 if 'all' in sys.argv:
     update_peering = True
-else:
-    update_peering = None
+
+if '--no-filters' in sys.argv:
+    update_filters = False
+
+if '--no-peering' in sys.argv:
+    update_peering = False
 
 if 'debug' in sys.argv:
     debugmode = True
-else:
-    debugmode = False
+
 
 peerings_flat = download(generic['peerings_url'])
 
@@ -184,6 +192,9 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
     for v in [4, 6]:
         if as_set == "ANY":
             continue
+        if not update_filters:
+            continue
+
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
