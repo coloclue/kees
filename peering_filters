@@ -6,7 +6,7 @@
     The ColoClue Network Automation Toolchain
 
     (c) 2014-2017 Job Snijders <job@instituut.net>
-    (c) 2017-2019 Network committee Coloclue <routers@coloclue.net>
+    (c) 2017-2023 Network committee Coloclue <routers@coloclue.net>
 
 """
 
@@ -76,20 +76,23 @@ for netdata in pdb_netdata['data']:
         else:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
 
-# By default, update only filters
-update_peering = False
-update_filters = True
+# Defaults
+generate_prefixsets = False
+generate_configs = True
 debugmode = False
+do_checks = True
 
 if 'all' in sys.argv:
-    update_peering = True
-
-if '--no-filters' in sys.argv:
-    update_filters = False
-
-if '--no-peering' in sys.argv:
-    update_peering = False
-
+    generate_prefixsets = True
+if '--no-prefixsets' in sys.argv:
+    generate_prefixsets = False
+    print("Saw '--no-prefixsets': not generating/updating prefix sets.")
+if '--no-configs' in sys.argv:
+    generate_configs = False
+    print("Saw '--no-configs': not generating/updating peering configuration.")
+if '--no-checks' in sys.argv:
+    do_checks = False
+    print("Saw 'no-checks': not checking for existing prefixsets before generating configuration.")
 if 'debug' in sys.argv:
     debugmode = True
 
@@ -98,7 +101,7 @@ peerings_flat = download(generic['peerings_url'])
 
 peerings = yaml.safe_load(peerings_flat)
 
-# ip addresses should not be needed to define ourselfs
+# ip addresses should not be needed to define ourselves
 #   this could be retrieved from https://www.peeringdb.com/api/ixlan
 ixp_map = {}
 router_map = {}
@@ -192,9 +195,7 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
     for v in [4, 6]:
         if as_set == "ANY":
             continue
-        if not update_filters:
-            continue
-
+ 
         filename = '%s.prefixset.bird.ipv%s' % (asn, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
@@ -284,6 +285,9 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
 
 
 for router in vendor_map:
+    if not generate_configs:
+        break
+
     if vendor_map[router] == "bird":
         try:
             os.remove("%s.ipv4.config" % router)
@@ -292,8 +296,7 @@ for router in vendor_map:
             print("INFO: Config for %s wasn't present, no need to delete" % router)
 
 for asn in peerings:
-
-    if update_peering:
+    if generate_prefixsets:
         if 'irr_order' in peerings[asn]:
             irr_order = peerings[asn]['irr_order']
         elif 'irr_order' in generic:
@@ -304,7 +307,8 @@ for asn in peerings:
 
         generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
     elif (not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and
-          not os.path.isfile('%s.prefixset.bird.ipv6' % asn)):
+          not os.path.isfile('%s.prefixset.bird.ipv6' % asn) and
+          do_checks):
         continue
 
     sessions = []
@@ -432,6 +436,10 @@ for asn in peerings:
                                     and block_importexport is False:
                                 block_importexport = \
                                     generic['bgp_groups'][ixprouter]['block_importexport']
+
+                        if not generate_configs:
+                            continue
+
                         config_snippet(asn, str(session_ip), description, ixp,
                                        router, no_filter, export_full_table,
                                        limits, gtsm, peer_type, multihop, disable_multihop_source_map,
