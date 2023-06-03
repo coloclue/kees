@@ -253,7 +253,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         peer_info = {'asn': asn.replace('AS', ''), 'afi': v,
                      'prefix_set': policy_name.replace(':', '_'),
                      'neigh_ip': peer,
-                     'neigh_name': 'peer_%s_%s' % (asn, neighbor_name),
+                     'neigh_name': 'peer_%s_%s_%s' % (asn, ixp.replace('-',''), neighbor_name),
                      'description': description,
                      'filter_name': filter_name,
                      'limit': limit,
@@ -282,6 +282,51 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         f.write(peer_config_blob)
         f.close()
 
+
+def ebgp_peer_type(asn):
+    if 'type' in peerings[asn]:
+        return peerings[asn]['type']
+    else:
+        return 'peer'
+
+def ebgp_setting(setting, default_value, asn, ixp, session_ip):
+    ip = str(session_ip)
+    bgp_settings = {}
+    if 'bgp_settings' in generic:
+        bgp_settings = generic['bgp_settings']
+
+    if asn in bgp_settings:
+        if (('session' in bgp_settings[asn]) and
+            (ip in bgp_settings[asn]['session']) and
+            (setting in bgp_settings[asn]['session'][ip])):
+            return bgp_settings[asn]['session'][ip][setting]
+        if (('ixp' in bgp_settings[asn]) and
+            (ixp in bgp_settings[asn]['ixp']) and
+            (setting in bgp_settings[asn]['ixp'][ixp])):
+            return bgp_settings[asn]['ixp'][ixp][setting]
+        if (('common' in bgp_settings[asn]) and
+            (setting in bgp_settings[asn]['common'])):
+            return bgp_settings[asn]['common'][setting]
+    if setting in ixp_map[ixp]:
+        return ixp_map[ixp][setting]
+
+    # last resort
+    return default_value
+
+
+def ebgp_local_pref(asn, ixp, session_ip):
+    setting = 'bgp_local_pref'
+    default_value = ebgp_local_pref_default(ebgp_peer_type(asn), 100)
+
+    return ebgp_setting(setting, default_value, asn, ixp, session_ip)
+
+def ebgp_local_pref_default(peer_type, default_value = 100):
+    if peer_type == 'downstream':
+        return 500
+    if peer_type == 'upstream':
+        return 60
+
+    return default_value
 
 for router in vendor_map:
     if not generate_configs:
@@ -327,7 +372,7 @@ for asn in peerings:
         session_ip = ipaddr.IPAddress(session)
         for ixp in ixp_map:
             for subnet in ixp_map[ixp]['subnets']:
-                bgp_local_pref = ixp_map[ixp]['bgp_local_pref']
+                bgp_local_pref = ebgp_local_pref(asn, ixp, session_ip)
                 if session_ip in subnet:
                     print("found peer %s in IXP %s with localpref %d" % (session_ip, ixp, bgp_local_pref))
                     print("must deploy on %s" % " ".join(router_map[ixp]))
@@ -342,10 +387,7 @@ for asn in peerings:
                         if 'not_on' in peerings[asn] and ixp in peerings[asn]['not_on']:
                             continue
 
-                        if 'type' in peerings[asn]:
-                            peer_type = peerings[asn]['type']
-                        else:
-                            peer_type = "peer"
+                        peer_type = ebgp_peer_type(asn)
 
                         if peerings[asn]['import'] == "ANY":
                             no_filter = True

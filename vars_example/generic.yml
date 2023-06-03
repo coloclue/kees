@@ -16,6 +16,7 @@ bgp_groups:
     graceful_shutdown: True
     admin_down_state: False
     block_importexport: True
+    bgp_local_pref: 120
   "nlix":
     graceful_shutdown: False
     admin_down_state: False
@@ -32,6 +33,7 @@ bgp_groups:
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
+    bgp_local_pref: 125
   "decix":
     graceful_shutdown: False
     admin_down_state: False
@@ -48,6 +50,14 @@ bgp_groups:
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
+
+bgp_settings:
+  AS6939:
+    common:
+      bgp_local_pref: 40
+    ixp:
+      amsix:
+        bgp_local_pref: 45
 
 coloclue:
   supernets:
