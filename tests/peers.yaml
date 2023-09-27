@@ -2,7 +2,7 @@
 # Test set for Kees CI pipeline
 # Limit the number of ASNs, but ensure we keep:
 #   * IXP route servers (AS6777, AS34307, AS56393)
-#   * Blackhole-capable IXP route servers (AS6695)
+#   * Blackhole-capable IXP route servers (AS42476)
 #   * Peers we explicitly include/exclude for given IXPs (AS6939, AS8298)
 #   * Peers we use non-standard AS-SETs with (AS15562)
 #   * Peers that override PeeringDB settings (AS1299, AS3320, AS6453)
@@ -22,7 +22,7 @@ AS1299:
     export: "AS8283:AS-COLOCLUE"
     ipv4_limit: 605000
     ipv6_limit: 110000
-    ignore_peeringdb: True
+    ignore_peeringdb: true
     private_peerings:
         - 62.115.144.32
         - 2001:2000:3080:0EBC::1
@@ -31,7 +31,7 @@ AS3320:
     description: Deutsche Telekom
     import: AS3320:AS-DTAG AS3320:AS-CUSTOMERS-V6
     export: "AS8283:AS-COLOCLUE"
-    ignore_peeringdb: True
+    ignore_peeringdb: true
     only_with:
         - 80.249.209.211
         - 2001:7f8:1::a500:3320:1
@@ -40,7 +40,7 @@ AS6453:
     description: Tata
     import: AS-GLOBEINTERNET
     export: "AS8283:AS-COLOCLUE"
-    ignore_peeringdb: True
+    ignore_peeringdb: true
     only_with:
         - 80.249.209.167
         - 2001:7f8:1::a500:6453:1
@@ -64,9 +64,9 @@ AS8298:
     import: AS-IPNG
     export: AS8283:AS-COLOCLUE
     not_on:
-        #- decix
+        # - decix
         - franceix
-        #- swissix
+        # - swissix
 
 AS13335:
     description: Cloudflare
@@ -124,6 +124,13 @@ AS41441:
     description: SPEED-IX route server peers
     import: AS-IX
     export: AS8283:AS-COLOCLUE
+
+AS42476:
+    description: SwissIX Route Servers
+    import: AS-SWISSIX-RS
+    export: AS8283:AS-COLOCLUE
+    # https://www.swissix.ch/resources/blackholing-guide/
+    blackhole_accept: true
 
 AS56393:
     description: Frys-IX Route Servers

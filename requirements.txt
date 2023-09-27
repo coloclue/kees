@@ -7,3 +7,4 @@ numpy  # https://numpy.org/
 requests  # https://requests.readthedocs.io/en/master/
 rtrsub  # https://github.com/job/rtrsub
 pyyaml  # https://github.com/yaml/pyyaml
+yamllint  # https://pypi.org/project/yamllint/  
