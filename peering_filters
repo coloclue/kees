@@ -154,32 +154,43 @@ else:
     irr_source_host = 'rr.ntt.net'
 
 
-j2_templates = {}
-
 def render(tpl_path, context):
     path, filename = os.path.split(launchdir + '/' + tpl_path)
-    if tpl_path not in j2_templates:
-        j2_templates[tpl_path] = Environment(
-            loader=FileSystemLoader(path or './')
-            ).get_template(filename)
-    return j2_templates[tpl_path].render(context)
+    env = Environment(loader=FileSystemLoader(path or './'))
+    env.trim_blocks = True
+    env.lstrip_blocks = True
+    env.rstrip_blocks = True
 
+    return env.get_template(filename).render(context)
 
-def generate_filters(asn, as_set, irr_order, irr_source_host):
+def generate_filters(asn, as_set, irr_order, irr_source_host, loose = False):
+    # Default filter settings
+    filtername_prefix = 'AUTOFILTER'
+    filename_prefix = 'prefixset'
+    max_prefix_length = allow_upto
+
+    # Loose filtering settings
+    if (loose):
+        filtername_prefix = 'LOOSEFILTER'
+        filename_prefix = 'looseprefixset'
+        max_prefix_length = {
+            4:  "32",
+            6: "128"
+        }
 
     # inner function for actual bgpq3 execution
     def run_bgpq3(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
 
-        stanza_name = "AUTOFILTER_%s_IPv%s%s" % (asn, v, subterm)
+        stanza_name = "%s_%s_IPv%s%s" % (filtername_prefix, asn, v, subterm)
 
         with open(filename, "w") as bgpq3_result:
             if flags:
                 p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                        allow_upto[v], "-%s" % v, vendor] + flags +
+                        max_prefix_length[v], "-%s" % v, vendor] + flags +
                         ["-l", stanza_name, "-A", asn] + as_set, stdout=bgpq3_result)
             else:
                 p = Popen(["bgpq3", "-h", irr_source_host, "-S", irr_order, "-R",
-                        allow_upto[v], "-%s" % v, vendor, "-l", stanza_name,
+                        max_prefix_length[v], "-%s" % v, vendor, "-l", stanza_name,
                         "-A", asn] + as_set, stdout=bgpq3_result)
         if debugmode:
             print("DEBUG: bgpq3 args: {}".format(p.args))
@@ -195,7 +206,7 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
         if as_set == "ANY":
             continue
  
-        filename = '%s.prefixset.bird.ipv%s' % (asn, v)
+        filename = '%s.%s.bird.ipv%s' % (asn, filename_prefix, v)
         if os.path.exists(filename):
             if time.time() - os.path.getmtime(filename) > 3600:
                 errno = run_bgpq3(filename, v, as_set, '-b', None, "", asn, irr_order, irr_source_host)
@@ -218,7 +229,8 @@ seen_bird_peers = {}
 def config_snippet(asn, peer, description, ixp, router, no_filter,
                    export_full_table, limits, gtsm, peer_type,
                    multihop, disable_multihop_source_map, multihop_source_map, generic,
-                   admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown):
+                   admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown,
+                   blackhole_accept, blackhole_community):
     if peer_type not in ['upstream', 'peer', 'downstream']:
         print("ERROR: invalid peertype: %s for %s" % (peer_type, asn))
         sys.exit(2)
@@ -270,7 +282,10 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
                      'admin_down_state': admin_down_state,
                      'block_importexport': block_importexport,
                      'bgp_local_pref': bgp_local_pref,
-                     'graceful_shutdown': graceful_shutdown
+                     'graceful_shutdown': graceful_shutdown,
+                     'blackhole_accept': blackhole_accept,
+                     'blackhole_community': blackhole_community,
+                     'loose_prefix_set': policy_name.replace('AUTOFILTER', 'LOOSEFILTER').replace(':', '_')
                      }
 
         peer_config_blob = render('templates/peer.j2', peer_info)
@@ -350,6 +365,13 @@ for asn in peerings:
             irr_order += "ARIN-WHOIS,REGISTROBR"
 
         generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
+
+        # For peers we agree blackhole communities with, also generate a 'loose' IRR prefix set
+        if 'blackhole_accept' in peerings[asn]:
+            if peerings[asn]['blackhole_accept']:
+                loose = True
+                generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host, loose) 
+
     elif (not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and
           not os.path.isfile('%s.prefixset.bird.ipv6' % asn) and
           do_checks):
@@ -428,6 +450,14 @@ for asn in peerings:
                             if peerings[asn]['disable_multihop_source_map']:
                                 disable_multihop_source_map = True
 
+                        blackhole_accept = False
+                        if 'blackhole_accept' in peerings[asn]:
+                            blackhole_accept = peerings[asn]['blackhole_accept']
+                        
+                        blackhole_community = [ '65535:666' ]
+                        if 'blackhole_community' in peerings[asn]:
+                            blackhole_community = peerings[asn]['blackhole_community']
+
                         ixprouter = ixp + '-' + routershort
                         admin_down_state = False
                         # Is the IXP defined in the bgp_groups settings
@@ -485,4 +515,5 @@ for asn in peerings:
                                        router, no_filter, export_full_table,
                                        limits, gtsm, peer_type, multihop, disable_multihop_source_map,
                                        multihop_source_map, generic,
-                                       admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown)
+                                       admin_down_state, block_importexport, bgp_local_pref, graceful_shutdown,
+                                       blackhole_accept, blackhole_community)

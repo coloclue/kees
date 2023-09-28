@@ -1,6 +1,9 @@
 
 filter peer_in_AS{{ asn }}_ipv{{ afi }}
 prefix set {{ prefix_set }};
+{% if blackhole_accept %}
+prefix set {{ loose_prefix_set }};  # Loose IRR filter for blackhole use
+{% endif %}
 {
     # ignore bogon AS_PATHs
     if is_bogon_aspath() then {
@@ -34,12 +37,22 @@ prefix set {{ prefix_set }};
     bgp_local_pref = 0;
 {% endif %}
 
+{% if blackhole_accept %}
+    if ( (65535, 666) ~ bgp_community) && net ~ {{ loose_prefix_set }}) then {
+        print "Accept blackhole: ", net, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
+        dest = RTD_BLACKHOLE;
+        accept;
+    }
+{% endif %}
+
 {% if peer_type == "peer" %}
     # Scrub BGP Communities (RFC 7454 Section 11) from peering partners
     bgp_community.delete([(8283, *)]);
     bgp_large_community.delete([(8283, *, *)]);
+{% if not blackhole_accept %}
     # Scrub BLACKHOLE Community from peering partners
     bgp_community.delete((65535, 666));
+{% endif %}
     bgp_community.add((8283,1)); /* mark peering routes as peering routes */
     bgp_large_community.add((8283, 0, 1)); /* mark peering routes as peering routes */
 {% if ixp_community %}
@@ -52,6 +65,9 @@ prefix set {{ prefix_set }};
 {% endif %}
 
     include "AS{{ asn }}.prefixset.bird.ipv{{ afi }}";
+{% if blackhole_accept %}
+    include "AS{{ asn }}.looseprefixset.bird.ipv{{ afi }}";
+{% endif %}
     if (net ~ {{ prefix_set }}{% if rpki.validation %} || (8283, 5, 2) ~ bgp_large_community{% endif %}) then {
         bgp_med = 0;
 
