@@ -35,6 +35,10 @@ jobs:
         run: |
           pip3 install -r requirements.txt
 
+      - name: Test peers.yaml (YAML syntax)
+        run: |
+          yamllint -d "{ extends: default, rules: { line-length: { max: 120 } } }" tests/peers.yaml
+
       - name: Prepare build and staging directories
         run: |
           mkdir -p ${BUILDDIR}

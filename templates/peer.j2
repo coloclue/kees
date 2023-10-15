@@ -4,45 +4,45 @@ protocol bgp {{ neigh_name }} {
     neighbor {{ neigh_ip }} as {{ asn }};
     include "../ebgp_state.conf";
     local as 8283;
-{%- if bgp_local_pref is defined %}
+    {% if bgp_local_pref is defined %}
     default bgp_local_pref {{ bgp_local_pref }};
-{%- endif %}
+    {% endif %}
     ipv{{ afi|replace('ipv', '') }} {
         next hop self;
-{%- if limit is greaterthan 0 %}
+    {% if limit is greaterthan 0 %}
         receive limit {{ limit }} action restart;
-{%- endif %}
+    {% endif %}
         import keep filtered;
-{%- if block_importexport %}
+    {% if block_importexport %}
         import none;
-{%- else %}
+    {% else %}
         import filter {{ filter_name }};
-{%- endif %}
-{%- if block_importexport %}
+    {% endif %}
+    {% if block_importexport %}
         export none;
-{%- elif export_full_table %}
+    {% elif export_full_table %}
         export where full_table_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
-{%- else %}
+    {% else %}
         export where ebgp_peering_export({{ asn }}, {%- if graceful_shutdown -%}1{%- else -%}0{%- endif -%});
-{%- endif %}
+    {% endif %}
     };
-{%- if password %}
+    {% if password %}
     password "{{ password }}";
-{%- endif %}
-{%- if gtsm %}
+    {% endif %}
+    {% if gtsm %}
     ttl security on;
-{%- endif %}
-{%- if multihop %}
+    {% endif %}
+    {% if multihop %}
     multihop;
-    {%- if not disable_multihop_source_map %}
+        {% if not disable_multihop_source_map %}
     source address {{ source }};
-    {%- endif %}
-{%- endif %}
-{%- if admin_down_state %}
+        {% endif %}
+    {% endif %}
+    {% if admin_down_state %}
     disabled;
-{%- endif %}
-{%- if graceful_shutdown %}
+    {% endif %}
+    {% if graceful_shutdown %}
     default bgp_local_pref 0;
-{%- endif %}
+    {% endif %}
 }
 
