@@ -27,10 +27,9 @@ import yaml
 with open('vars/generic.yml') as genfile:
     generic = yaml.safe_load(genfile)
 
-def download(url):
+def download(url, headers = {}):
+    headers['user-agent'] = 'coloclue-kees'
     try:
-        headers = {"Authorization": "Api-Key " +
-                   os.environ.get('PEERINGDB_API_KEY', generic['pdb_apikey'])}
         r = requests.get(url, headers=headers)
         downloaded_file = r.text
     except requests.exceptions.RequestException:
@@ -40,8 +39,24 @@ def download(url):
     return downloaded_file
 
 
+def readfile(filename):
+    try:
+        with open(filename, 'r') as reader:
+            filecontent = reader.read()
+    except:
+        print("Reading %s failed" % filename, file = sys.stderr)
+        sys.exit(2)
+
+    return filecontent
+
+
+pdb_auth = {
+    "Authorization": (
+        "Api-Key " + os.environ.get('PEERINGDB_API_KEY', generic['pdb_apikey'])
+    )
+}
 netixlan = 'https://www.peeringdb.com/api/netixlan'
-pdb_data = json.loads(download(netixlan))
+pdb_data = json.loads(download(netixlan, pdb_auth))
 
 pdb = {}
 for connection in pdb_data['data']:
@@ -56,7 +71,7 @@ for connection in pdb_data['data']:
         pdb[asn].append(v6)
 
 net = 'https://www.peeringdb.com/api/net'
-pdb_netdata = json.loads(download(net))
+pdb_netdata = json.loads(download(net, pdb_auth))
 
 max_prefixes = {}
 for netdata in pdb_netdata['data']:
@@ -96,7 +111,11 @@ if 'debug' in sys.argv:
     debugmode = True
 
 
-peerings_flat = download(generic['peerings_url'])
+# For testing purposes, allow a local file as peering manifest
+if "PEERINGS_FILE" in os.environ:
+    peerings_flat = readfile(os.environ.get('PEERINGS_FILE'))
+else:
+    peerings_flat = download(generic['peerings_url'])
 
 peerings = yaml.safe_load(peerings_flat)
 

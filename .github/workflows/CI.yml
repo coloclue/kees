@@ -72,6 +72,7 @@ jobs:
           ./update-routers.sh check
         env:
           PEERINGDB_API_KEY: ${{ secrets.PEERINGDB_API_KEY }}
+          PEERINGS_FILE: ${{ github.workspace }}/tests/peers.yaml
 
       - name: Compress generated artifacts
         run: >-
