@@ -41,7 +41,7 @@ prefix set {{ loose_prefix_set }};  # Loose IRR filter for blackhole use
     # Per the peering manifest, we accept blackhole routes for this peer.
     # For blackholed routes, we use loose IRR filtering
     include "AS{{ asn }}.looseprefixset.bird.ipv{{ afi }}";
-    if ( (65535, 666) ~ bgp_community) && net ~ {{ loose_prefix_set }}) then {
+    if ( (65535, 666) ~ bgp_community && net ~ {{ loose_prefix_set }}) then {
         print "Accept blackhole: ", net, " filter: peer_in_AS{{ asn }}_ipv{{ afi }}";
         dest = RTD_BLACKHOLE;
         accept;
