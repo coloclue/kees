@@ -108,7 +108,7 @@ bgp:
     vendor: bird
     graceful_shutdown: false
     maintenance_mode: false
-  "dcg2":
+  "dc52":
     fqdn: dc5-2.router.nl.coloclue.net
     ipv4: 94.142.247.2
     ipv6: 2a02:898:0:300::2
