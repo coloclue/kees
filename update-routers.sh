@@ -8,8 +8,8 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
-#routers='dcg-1.router.nl.coloclue.net dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
-routers='dcg-1.router.nl.coloclue.net  dcg-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
+#routers='dcg-1.router.nl.coloclue.net dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
+routers='dcg-1.router.nl.coloclue.net  dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 
 . functions.sh
 
@@ -59,7 +59,7 @@ for router in ${routers}; do
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o ${STAGEDIR}/${router}/via_scrubbers_ipv6.conf
 
     # DCG specific stuff
-    if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dcg-2.router.nl.coloclue.net" ]; then
+    if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dc5-2.router.nl.coloclue.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dcg.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dcg.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     # EUNetworks specific stuff

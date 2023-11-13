@@ -40,7 +40,7 @@ Repository layout:
 	│   │   ├── bird6.conf                 <- Static config for bird6 (IPv6 definition on the routers)
 	│   │   ├── peerings                   <- Filled by peering_filters 
 	│   │   └── rpki                       <- Filled by rtrsub
-	│   ├── dcg-2.router.nl.coloclue.net
+	│   ├── dc5-2.router.nl.coloclue.net
 	│   │   ├── bird.conf
 	│   │   ├── bird6.conf
 	│   │   ├── peerings
@@ -77,7 +77,7 @@ Repository layout:
 	├── update-routers.sh
 	└── vars
 	    ├── dcg-1.router.nl.coloclue.net.yml
-	    ├── dcg-2.router.nl.coloclue.net.yml
+	    ├── dc5-2.router.nl.coloclue.net.yml
 	    ├── eunetworks-2.router.nl.coloclue.net.yml
 	    ├── generic.yml                    <- generic KEES settings and inventory for routers and IXPs
 	    ├── members_bgp.yml                <- ips & prefixes of members with BGP
