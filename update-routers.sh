@@ -103,6 +103,7 @@ if [ "${1}" == "push" ]; then
 
     # update RIPE if new peers are added
     php /opt/coloclue/update-as8283-ripe.php
+    php /opt/coloclue/update-asset-ripe.php
 
 	# kill ssh-agent
 	eval $(ssh-agent -k)
