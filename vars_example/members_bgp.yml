@@ -6,7 +6,7 @@ members_bgp:
       - "eunetworks":
         - "94.142.240.200"
         - "2a02:898:0:20::4"
-      - "dcg":
+      - "dc5":
         - "94.142.244.72"
         - "2a02:898::4"
     accept:
@@ -19,7 +19,7 @@ members_bgp:
     comment: "Member 1"
     disable_export: true
     sessions:
-      - "dcg":
+      - "dc5":
         - "192.168.0.3"
         - "fd00::3"
     accept:
@@ -36,7 +36,7 @@ members_bgp:
       - "eunetworks":
         - "192.168.1.3"
         - "fd00:2::3"
-      - "dcg":
+      - "dc5":
         - "192.168.1.4"
         - "fd00:3::3"
     accept:
@@ -52,7 +52,7 @@ members_bgp:
     as: 65300
     comment: "Member 3"
     sessions:
-      - "dcg":
+      - "dc5":
         - "192.168.1.4"
         - "fd00:4::3"
     accept: {}

@@ -9,7 +9,7 @@ interfaces:
     - nic: "enp1s0f3"   # internal wire to eunetworks-3
       cost: 100
       maintenance: False
-    - nic: "eno1.130"   # backbone to dcg-1
+    - nic: "eno1.130"   # backbone to dc5-1
       cost: 200
       bfd: True
       maintenance: False

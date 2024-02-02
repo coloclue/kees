@@ -15,7 +15,7 @@ transit:
           admin_down_state: False
           block_importexport: False
           bgp_local_pref: 90
-      dcg-1:
+      dc5-1:
         - ip4: 172.26.1.1
           ip6: fd00:26:1::1:2
           graceful_shutdown: False

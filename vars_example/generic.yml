@@ -21,7 +21,7 @@ bgp_groups:
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
-  "nlix-dcg-1":
+  "nlix-dc5-1":
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
@@ -101,8 +101,8 @@ bgp:
     vendor: bird
     graceful_shutdown: false
     maintenance_mode: false
-  "dcg1":
-    fqdn: dcg-1.router.nl.coloclue.net
+  "dc51":
+    fqdn: dc5-1.router.nl.coloclue.net
     ipv4: 94.142.247.1
     ipv6: 2a02:898:0:300::1
     vendor: bird
@@ -129,7 +129,7 @@ ixp_map:
     ipv4_range: 193.239.116.0/22
     ipv6_range: 2001:7f8:13::/64
     present_on:
-      - dcg-1.router.nl.coloclue.net
+      - dc5-1.router.nl.coloclue.net
       - eunetworks-3.router.nl.coloclue.net
   frysix:
     ixp_community: 3512
@@ -151,7 +151,7 @@ ixp_map:
     ipv6_range: 2001:7f8:54::/64
     bgp_local_pref: 90
     present_on:
-      - dcg-1.router.nl.coloclue.net
+      - dc5-1.router.nl.coloclue.net
   swissix:
     ixp_community: 60
     ipv4_range: 91.206.52.0/23
@@ -164,11 +164,11 @@ ixp_map:
     ipv6_range: 2001:2000:3080:0ebc::/126
     present_on:
       - eunetworks-2.router.nl.coloclue.net
-  private-dcg:
+  private-dc5:
     ipv4_range: 4.68.73.168/30
     ipv6_range: 2001:1900:5:3::190/126
     present_on:
-      - dcg-1.router.nl.coloclue.net
+      - dc5-1.router.nl.coloclue.net
 
 bgp_passwords:
     AS42: DefibClearOK

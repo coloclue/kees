@@ -8,8 +8,7 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
-#routers='dcg-1.router.nl.coloclue.net dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
-routers='dcg-1.router.nl.coloclue.net  dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
+routers='dc5-1.router.nl.coloclue.net dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
 
 . functions.sh
 
@@ -58,10 +57,10 @@ for router in ${routers}; do
     ./gentool -4 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o ${STAGEDIR}/${router}/via_scrubbers_ipv4.conf
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o ${STAGEDIR}/${router}/via_scrubbers_ipv6.conf
 
-    # DCG specific stuff
-    if [ "${router}" == "dcg-1.router.nl.coloclue.net" ] || [ "${router}" == "dc5-2.router.nl.coloclue.net" ]; then
-        ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dcg.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
-        ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dcg.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
+    # DC5 specific stuff
+    if [ "${router}" == "dc5-1.router.nl.coloclue.net" ] || [ "${router}" == "dc5-2.router.nl.coloclue.net" ]; then
+        ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc5.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
+        ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc5.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     # EUNetworks specific stuff
     elif [ "${router}" == "eunetworks-2.router.nl.coloclue.net" ] || [ "${router}" == "eunetworks-3.router.nl.coloclue.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-eunetworks.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
@@ -82,7 +81,7 @@ done
 
 if [ "${1}" == "push" ]; then
 
-	# sync config to dcg-1 router
+	# sync config to routers
 	eval $(ssh-agent -t 600)
 	ssh-add ~/.ssh/id_rsa_dcg1
 

@@ -35,7 +35,7 @@ Repository layout:
 	├── LICENSE
 	├── README
 	├── blobs
-	│   ├── dcg-1.router.nl.coloclue.net
+	│   ├── dc5-1.router.nl.coloclue.net
 	│   │   ├── bird.conf                  <- Static config for bird (IPv4 definition on the routers)
 	│   │   ├── bird6.conf                 <- Static config for bird6 (IPv6 definition on the routers)
 	│   │   ├── peerings                   <- Filled by peering_filters 
@@ -76,12 +76,12 @@ Repository layout:
 	│   └── transit.j2                     <- Template in which the BGP sessions towards our transits are defined
 	├── update-routers.sh
 	└── vars
-	    ├── dcg-1.router.nl.coloclue.net.yml
+	    ├── dc5-1.router.nl.coloclue.net.yml
 	    ├── dc5-2.router.nl.coloclue.net.yml
 	    ├── eunetworks-2.router.nl.coloclue.net.yml
 	    ├── generic.yml                    <- generic KEES settings and inventory for routers and IXPs
 	    ├── members_bgp.yml                <- ips & prefixes of members with BGP
-	    ├── statics-dcg.yml                <- static routes NorthC (f.k.a. DCG)
+	    ├── statics-dc5.yml                <- static routes NorthC (f.k.a. DC5)
 	    ├── statics-eunetworks.yml         <- static routes euNetworks
 	    ├── scrubbers.yml                  <- DDoS scrubber neighbours
 	    └── transit.yml                    <- transit eBGP neighbours

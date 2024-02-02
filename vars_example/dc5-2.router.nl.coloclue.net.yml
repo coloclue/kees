@@ -6,7 +6,7 @@ router_id: "94.142.247.2"
 interfaces:
   backbone:
     - nic: "lo"         # loopback
-    - nic: "enp1s0f3"   # internal wire to dcg-1
+    - nic: "enp1s0f3"   # internal wire to dc5-1
       cost: 100
       maintenance: False
     - nic: "eno1.130"   # backbone to eunetworks-3
