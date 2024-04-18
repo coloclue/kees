@@ -43,8 +43,8 @@ function ebgp_peering_export(int peerasn; int graceful_shutdown) {
         {{ export_features() }}
 
         # do not advertise prefixes to some ASN via routeservers
-        # AMS-IX, NL-IX, Asteroid, SPEED-IX, Inter-IX, Frys-IX, DE-CIX, FranceIX, SwissIX, Locix NL
-        if (peerasn ~ [6777, 34307, 41693, 41441, 56584, 56393, 6695, 51706, 42476, 209643]) then {
+        # AMS-IX, NL-IX, Asteroid, SPEED-IX, Inter-IX, Frys-IX, DE-CIX, FranceIX, SwissIX, Locix NL, ERA-IX
+        if (peerasn ~ [6777, 34307, 41693, 41441, 56584, 56393, 6695, 51706, 42476, 209643, 206221]) then {
              bgp_community.add((0,6939));     # Hurricane Electric
              bgp_community.add((0,16276));    # OVH
              bgp_community.add((0,24940));    # Hetzner
