@@ -15,7 +15,7 @@ from subprocess import Popen
 from hashlib import sha256
 from jinja2 import Environment, FileSystemLoader
 from numpy import base_repr
-import ipaddr
+import ipaddress
 import json
 import os
 import requests
@@ -125,8 +125,8 @@ ixp_map = {}
 router_map = {}
 for ixp in generic['ixp_map']:
     ixp_map[ixp] = {}
-    ixp_map[ixp]['subnets'] = [ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv4_range']),
-                               ipaddr.IPNetwork(generic['ixp_map'][ixp]['ipv6_range'])]
+    ixp_map[ixp]['subnets'] = [ipaddress.IPv4Network(generic['ixp_map'][ixp]['ipv4_range']),
+                               ipaddress.IPv6Network(generic['ixp_map'][ixp]['ipv6_range'])]
 
     # Set a default bgp_local_pref of 100, allow for IXP based override
     ixp_map[ixp]['bgp_local_pref'] = 100
@@ -255,7 +255,7 @@ def config_snippet(asn, peer, description, ixp, router, no_filter,
         sys.exit(2)
     global seen_router_policy
     vendor = vendor_map[router]
-    v = ipaddr.IPAddress(peer).version
+    v = ipaddress.IPAddress(peer).version
     policy_name = "AUTOFILTER:%s:IPv%s" % (asn, v)
 
     if vendor == "bird":
@@ -410,7 +410,7 @@ for asn in peerings:
         continue
 
     for session in sessions:
-        session_ip = ipaddr.IPAddress(session)
+        session_ip = ipaddress.IPAddress(session)
         for ixp in ixp_map:
             for subnet in ixp_map[ixp]['subnets']:
                 bgp_local_pref = ebgp_local_pref(asn, ixp, session_ip)
