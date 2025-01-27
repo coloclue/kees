@@ -15,6 +15,7 @@ from subprocess import Popen
 from hashlib import sha256
 from jinja2 import Environment, FileSystemLoader
 from numpy import base_repr
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import ipaddr
 import json
 import os
@@ -362,6 +363,32 @@ def ebgp_local_pref_default(peer_type, default_value = 100):
 
     return default_value
 
+def process_asn(asn, peerings, generic, generate_prefixsets, irr_source_host, do_checks):
+    results = []
+    if generate_prefixsets:
+        irr_order = (
+            peerings[asn].get('irr_order') or 
+            generic.get('irr_order') or 
+            "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,"
+            "ARIN-WHOIS,REGISTROBR"
+        )
+        
+        # Generate standard filters
+        generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
+        results.append(f"Generated filters for {asn}")
+        
+        # Generate loose filters for blackhole communities if applicable
+        if peerings[asn].get('blackhole_accept'):
+            generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host, loose=True)
+            results.append(f"Generated loose filters for {asn}")
+    
+    elif (not os.path.isfile(f'{asn}.prefixset.bird.ipv4') and
+          not os.path.isfile(f'{asn}.prefixset.bird.ipv6') and
+          do_checks):
+        results.append(f"Skipped {asn} due to missing files")
+    
+    return results
+
 for router in vendor_map:
     if not generate_configs:
         break
@@ -373,29 +400,22 @@ for router in vendor_map:
         except OSError:
             print("INFO: Config for %s wasn't present, no need to delete" % router)
 
+with ProcessPoolExecutor(max_workers=10) as executor:
+    futures = [
+        executor.submit(process_asn, asn, peerings, generic, generate_prefixsets, irr_source_host, do_checks)
+        for asn in peerings
+    ]
+    
+    for future in as_completed(futures):
+        try:
+            result = future.result()
+            for res in result:
+                print(res)
+        except Exception as e:
+            print(f"Error processing ASN: {e}")
+
+
 for asn in peerings:
-    if generate_prefixsets:
-        if 'irr_order' in peerings[asn]:
-            irr_order = peerings[asn]['irr_order']
-        elif 'irr_order' in generic:
-            irr_order = generic['irr_order']
-        else:
-            irr_order = "NTTCOM,INTERNAL,RADB,RIPE,ALTDB,BELL,LEVEL3,RGNET,APNIC,JPIRR,ARIN,BBOI,TC,AFRINIC,RPKI,"
-            irr_order += "ARIN-WHOIS,REGISTROBR"
-
-        generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host)
-
-        # For peers we agree blackhole communities with, also generate a 'loose' IRR prefix set
-        if 'blackhole_accept' in peerings[asn]:
-            if peerings[asn]['blackhole_accept']:
-                loose = True
-                generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host, loose) 
-
-    elif (not os.path.isfile('%s.prefixset.bird.ipv4' % asn) and
-          not os.path.isfile('%s.prefixset.bird.ipv6' % asn) and
-          do_checks):
-        continue
-
     sessions = []
     if 'only_with' in peerings[asn]:
         sessions = peerings[asn]['only_with']
