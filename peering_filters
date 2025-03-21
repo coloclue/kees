@@ -81,13 +81,13 @@ for netdata in pdb_netdata['data']:
         max_prefixes[asn] = {}
     if 'info_prefixes4' in netdata:
         maxprefixes_v4 = netdata['info_prefixes4']
-        if maxprefixes_v4 < 100:
+        if maxprefixes_v4 is None or maxprefixes_v4 < 100:
             max_prefixes[asn]['v4'] = 100
         else:
             max_prefixes[asn]['v4'] = int(maxprefixes_v4 * 1.1)
     if 'info_prefixes6' in netdata:
         maxprefixes_v6 = netdata['info_prefixes6']
-        if maxprefixes_v6 < 100:
+        if maxprefixes_v6 is None or maxprefixes_v6 < 100:
             max_prefixes[asn]['v6'] = 100
         else:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
