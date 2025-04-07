@@ -230,6 +230,9 @@ bogons:
   - prefix: "185.1.203.0"
     length: 24
     comment: "IXP: Frys-IX Peering LAN"
+  - prefix: "185.1.160.0"
+    length: 23
+    comment: "IXP: Frys-IX Peering LAN"
   - prefix: "2001:7f8:10f::"
     length: 64
     comment: "IXP: Frys-IX Peering LAN"
