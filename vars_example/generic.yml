@@ -8,6 +8,11 @@ pdb_apikey: xxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 irr_source_host: rr.ntt.net
 irr_order: NTTCOM,INTERNAL,RADB,RIPE
 
+kees_db_host: xxxx
+kees_db_user: xxxx
+kees_db_pass: xxxx
+kees_db_daba: xxxx
+
 builddir: '/opt/routefilters'
 stagedir: '/opt/router-staging'
 

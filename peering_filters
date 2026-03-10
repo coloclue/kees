@@ -18,6 +18,8 @@ from numpy import base_repr
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import ipaddr
 import json
+import MySQLdb
+import MySQLdb.cursors
 import os
 import requests
 import sys
@@ -51,16 +53,23 @@ def readfile(filename):
     return filecontent
 
 
-pdb_auth = {
-    "Authorization": (
-        "Api-Key " + os.environ.get('PEERINGDB_API_KEY', generic['pdb_apikey'])
-    )
-}
-netixlan = 'https://sysadmin.coloclue.net/peeringdb/netixlan'
-pdb_data = json.loads(download(netixlan, pdb_auth))
+# --- MariaDB connection (replaces PeeringDB HTTP downloads) ---
+db = MySQLdb.connect(
+    host=os.environ.get('ENVKEES_DB_HOST', generic['kees_db_host']),
+    db=os.environ.get('ENVKEES_DB_USER', generic['kees_db_user']),
+    user=os.environ.get('ENVKEES_DB_USER', generic['kees_db_pass']),
+    passwd=os.environ.get('ENVKEES_DB_DABA', generic['kees_db_daba']),
+)
+cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
+# Build pdb: {asn_int: [ip, ...]}  (replaces /peeringdb/netixlan download)
+cursor.execute("""
+    SELECT asn, ipaddr4, ipaddr6
+    FROM peeringdb_networkixlan
+    WHERE status = 'ok'
+""")
 pdb = {}
-for connection in pdb_data['data']:
+for connection in cursor.fetchall():
     asn = connection['asn']
     v4 = connection['ipaddr4']
     v6 = connection['ipaddr6']
@@ -71,11 +80,14 @@ for connection in pdb_data['data']:
     if v6:
         pdb[asn].append(v6)
 
-net = 'https://sysadmin.coloclue.net/peeringdb/net'
-pdb_netdata = json.loads(download(net, pdb_auth))
-
+# Build max_prefixes: {'ASxxx': {'v4': n, 'v6': n}}  (replaces /peeringdb/net download)
+cursor.execute("""
+    SELECT asn, info_prefixes4, info_prefixes6
+    FROM peeringdb_network
+    WHERE status = 'ok'
+""")
 max_prefixes = {}
-for netdata in pdb_netdata['data']:
+for netdata in cursor.fetchall():
     asn = 'AS' + str(netdata['asn'])
     if asn not in max_prefixes:
         max_prefixes[asn] = {}
@@ -91,6 +103,10 @@ for netdata in pdb_netdata['data']:
             max_prefixes[asn]['v6'] = 100
         else:
             max_prefixes[asn]['v6'] = int(maxprefixes_v6 * 1.1)
+
+cursor.close()
+db.close()
+# --- end MariaDB block ---
 
 # Defaults
 generate_configs = False
