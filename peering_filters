@@ -12,6 +12,7 @@
 
 from subprocess import PIPE
 from subprocess import Popen
+import subprocess
 from hashlib import sha256
 from jinja2 import Environment, FileSystemLoader
 from numpy import base_repr
@@ -199,11 +200,24 @@ def render(tpl_path, context):
 
     return env.get_template(filename).render(context)
 
-def generate_filters(asn, as_set, irr_order, irr_source_host):
+def generate_filters(asn, as_set, irr_order, irr_source_host, loose = False):
+    # Default filter settings
+    filtername_prefix = 'AUTOFILTER'
+    filename_prefix = 'prefixset'
+    max_prefix_length = allow_upto
+
+    # Loose filtering settings
+    if (loose):
+        filtername_prefix = 'LOOSEFILTER'
+        filename_prefix = 'looseprefixset'
+        max_prefix_length = {
+            4:  "32",
+            6: "128"
+        }
 
     # inner function for actual bgpq4 execution
     def run_bgpq4(filename, v, as_set, vendor, flags, subterm, asn, irr_order, irr_source_host):
-        stanza_name = "AUTOFILTER_{}_IPv{}{}".format(asn, v, subterm)
+        stanza_name = "%s_%s_IPv%s%s" % (filtername_prefix, asn, v, subterm)
         args = ["bgpq4", "-h", irr_source_host, "-S", irr_order, "-4", "-A", "-l", stanza_name]
         
         if v == 6:
@@ -230,9 +244,9 @@ def generate_filters(asn, as_set, irr_order, irr_source_host):
     for v in [4, 6]:
         if as_set == "ANY":
             continue
-        filename = f"{asn}.prefixset.bird.ipv{v}"
+        filename = '%s.%s.bird.ipv%s' % (asn, filename_prefix, v)
         if os.path.exists(filename):
-            if time.time() - os.path.getmtime(filename) > 1800:
+            if time.time() - os.path.getmtime(filename) > 3600:
                 run_bgpq4(filename, v, as_set, 'b', None, "", asn, irr_order, irr_source_host)
                 print(f"bird ipv{v} refreshed: {filename}")
             else:
@@ -378,9 +392,9 @@ def process_asn(asn, peerings, generic, generate_prefixsets, irr_source_host, do
         results.append(f"Generated filters for {asn}")
         
         # Generate loose filters for blackhole communities if applicable
-        #if peerings[asn].get('blackhole_accept'):
-        #    generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host, loose=True)
-        #    results.append(f"Generated loose filters for {asn}")
+        if peerings[asn].get('blackhole_accept'):
+            generate_filters(asn, peerings[asn]['import'].split(), irr_order, irr_source_host, loose=True)
+            results.append(f"Generated loose filters for {asn}")
     
     elif (not os.path.isfile(f'{asn}.prefixset.bird.ipv4') and
           not os.path.isfile(f'{asn}.prefixset.bird.ipv6') and
