@@ -65,7 +65,7 @@ cursor = db.cursor(MySQLdb.cursors.DictCursor)
 # Build pdb: {asn_int: [ip, ...]}  (replaces /peeringdb/netixlan download)
 cursor.execute("""
     SELECT asn, ipaddr4, ipaddr6
-    FROM peeringdb_networkixlan
+    FROM peeringdb_network_ixlan
     WHERE status = 'ok'
 """)
 pdb = {}
