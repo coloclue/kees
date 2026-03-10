@@ -56,9 +56,9 @@ def readfile(filename):
 # --- MariaDB connection (replaces PeeringDB HTTP downloads) ---
 db = MySQLdb.connect(
     host=os.environ.get('ENVKEES_DB_HOST', generic['kees_db_host']),
-    db=os.environ.get('ENVKEES_DB_USER', generic['kees_db_user']),
-    user=os.environ.get('ENVKEES_DB_USER', generic['kees_db_pass']),
-    passwd=os.environ.get('ENVKEES_DB_DABA', generic['kees_db_daba']),
+    user=os.environ.get('ENVKEES_DB_USER', generic['kees_db_user']),
+    passwd=os.environ.get('ENVKEES_DB_USER', generic['kees_db_pass']),
+    db=os.environ.get('ENVKEES_DB_DABA', generic['kees_db_daba']),
 )
 cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
