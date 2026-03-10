@@ -89,7 +89,7 @@ Repository layout:
 Dependencies:
 -------------
 
-    bgpq3 - http://snar.spb.ru/prog/bgpq3/
+    bgpq4 - http://snar.spb.ru/prog/bgpq3/
     BIRD 2 - https://bird.network.cz/ # minimum version is 2.0.8
     OpenSSH client - https://www.openssh.com/
     PHP - https://www.php.net/  # TODO: what's the minimum supported version?
@@ -131,7 +131,7 @@ users most likely want to run it like this:
 To prepare a Debian machine to build Kees:
 
 ```
-sudo apt install python3-pip bgpq3 python3-jinja2
+sudo apt install python3-pip bgpq4 python3-jinja2
 sudo pip3 install rtrsub
 sudo pip3 install numpy
 sudo pip3 install ipaddr
