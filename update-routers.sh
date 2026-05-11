@@ -8,7 +8,7 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
-routers='dc5-1.router.nl.coloclue.net dc5-2.router.nl.coloclue.net eunetworks-2.router.nl.coloclue.net eunetworks-3.router.nl.coloclue.net'
+routers='dc5-1.router.nl.coloclue.net dc5-2.router.nl.coloclue.net dc6-2.router.nl.coloclue.net dc6-1.router.nl.coloclue.net'
 
 . functions.sh
 
@@ -62,9 +62,9 @@ for router in ${routers}; do
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc5.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc5.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     # EUNetworks specific stuff
-    elif [ "${router}" == "eunetworks-2.router.nl.coloclue.net" ] || [ "${router}" == "eunetworks-3.router.nl.coloclue.net" ]; then
-        ./gentool -4 -t templates/static_routes.j2 -y vars/statics-eunetworks.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
-        ./gentool -6 -t templates/static_routes.j2 -y vars/statics-eunetworks.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
+    elif [ "${router}" == "dc6-2.router.nl.coloclue.net" ] || [ "${router}" == "dc6-1.router.nl.coloclue.net" ]; then
+        ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
+        ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     fi
 
     rsync -av blobs/${router}/ ${STAGEDIR}/${router}/

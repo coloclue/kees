@@ -45,13 +45,13 @@ Repository layout:
 	│   │   ├── bird6.conf
 	│   │   ├── peerings
 	│   │   └── rpki
-	│   ├── eunetworks-2.router.nl.coloclue.net
+	│   ├── dc6-2.router.nl.coloclue.net
 	│   │   ├── bird.conf
 	│   │   ├── bird6.conf
 	│   │   ├── blackholes                 <- Specific annoucements to mitigate DDoSses is placed here automatically
 	│   │   ├── peerings
 	│   │   └── rpki
-	│   └── eunetworks-3.router.nl.coloclue.net
+	│   └── dc6-1.router.nl.coloclue.net
 	│       ├── bird.conf
 	│       ├── bird6.conf
 	│       ├── peerings
@@ -78,11 +78,11 @@ Repository layout:
 	└── vars
 	    ├── dc5-1.router.nl.coloclue.net.yml
 	    ├── dc5-2.router.nl.coloclue.net.yml
-	    ├── eunetworks-2.router.nl.coloclue.net.yml
+	    ├── dc6-2.router.nl.coloclue.net.yml
 	    ├── generic.yml                    <- generic KEES settings and inventory for routers and IXPs
 	    ├── members_bgp.yml                <- ips & prefixes of members with BGP
-	    ├── statics-dc5.yml                <- static routes NorthC (f.k.a. DC5)
-	    ├── statics-eunetworks.yml         <- static routes euNetworks
+	    ├── statics-dc5.yml                <- static routes Qupra
+	    ├── statics-dc6.yml                <- static routes Iron Mountain
 	    ├── scrubbers.yml                  <- DDoS scrubber neighbours
 	    └── transit.yml                    <- transit eBGP neighbours
 

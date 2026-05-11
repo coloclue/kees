@@ -3,7 +3,7 @@ members_bgp:
     as: 65000
     comment: "Coloclue"
     sessions:
-      - "eunetworks":
+      - "dc6":
         - "94.142.240.200"
         - "2a02:898:0:20::4"
       - "dc5":
@@ -33,7 +33,7 @@ members_bgp:
     as: 65200
     comment: "Member 2"
     sessions:
-      - "eunetworks":
+      - "dc6":
         - "192.168.1.3"
         - "fd00:2::3"
       - "dc5":

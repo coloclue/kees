@@ -1,12 +1,12 @@
-hostname: "eunetworks-2.router.nl.coloclue.net"
-shortname: "eunetworks2"
+hostname: "dc6-2.router.nl.coloclue.net"
+shortname: "dc62"
 
 router_id: "94.142.247.3"
 
 interfaces:
   backbone:
     - nic: "lo"         # loopback
-    - nic: "enp1s0f3"   # internal wire to eunetworks-3
+    - nic: "enp1s0f3"   # internal wire to dc6-1
       cost: 100
       maintenance: False
     - nic: "eno1.130"   # backbone to dc5-1
