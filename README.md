@@ -35,12 +35,12 @@ Repository layout:
 	├── LICENSE
 	├── README
 	├── blobs
-	│   ├── dc5-1.router.nl.coloclue.net
+	│   ├── dc3-1.router.nl.coloclue.net
 	│   │   ├── bird.conf                  <- Static config for bird (IPv4 definition on the routers)
 	│   │   ├── bird6.conf                 <- Static config for bird6 (IPv6 definition on the routers)
 	│   │   ├── peerings                   <- Filled by peering_filters 
 	│   │   └── rpki                       <- Filled by rtrsub
-	│   ├── dc5-2.router.nl.coloclue.net
+	│   ├── dc3-2.router.nl.coloclue.net
 	│   │   ├── bird.conf
 	│   │   ├── bird6.conf
 	│   │   ├── peerings
@@ -76,12 +76,13 @@ Repository layout:
 	│   └── transit.j2                     <- Template in which the BGP sessions towards our transits are defined
 	├── update-routers.sh
 	└── vars
-	    ├── dc5-1.router.nl.coloclue.net.yml
-	    ├── dc5-2.router.nl.coloclue.net.yml
+	    ├── dc3-1.router.nl.coloclue.net.yml
+	    ├── dc3-2.router.nl.coloclue.net.yml
+            ├── dc6-1.router.nl.coloclue.net.yml
 	    ├── dc6-2.router.nl.coloclue.net.yml
 	    ├── generic.yml                    <- generic KEES settings and inventory for routers and IXPs
 	    ├── members_bgp.yml                <- ips & prefixes of members with BGP
-	    ├── statics-dc5.yml                <- static routes Qupra
+	    ├── statics-dc3.yml                <- static routes Qupra
 	    ├── statics-dc6.yml                <- static routes Iron Mountain
 	    ├── scrubbers.yml                  <- DDoS scrubber neighbours
 	    └── transit.yml                    <- transit eBGP neighbours
