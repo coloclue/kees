@@ -26,7 +26,7 @@ bgp_groups:
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
-  "nlix-dc5-1":
+  "nlix-dc3-1":
     graceful_shutdown: False
     admin_down_state: False
     block_importexport: False
@@ -106,15 +106,15 @@ bgp:
     vendor: bird
     graceful_shutdown: false
     maintenance_mode: false
-  "dc51":
-    fqdn: dc5-1.router.nl.coloclue.net
+  "dc31":
+    fqdn: dc3-1.router.nl.coloclue.net
     ipv4: 94.142.247.1
     ipv6: 2a02:898:0:300::1
     vendor: bird
     graceful_shutdown: false
     maintenance_mode: false
-  "dc52":
-    fqdn: dc5-2.router.nl.coloclue.net
+  "dc32":
+    fqdn: dc3-2.router.nl.coloclue.net
     ipv4: 94.142.247.2
     ipv6: 2a02:898:0:300::2
     vendor: bird
@@ -134,7 +134,7 @@ ixp_map:
     ipv4_range: 193.239.116.0/22
     ipv6_range: 2001:7f8:13::/64
     present_on:
-      - dc5-1.router.nl.coloclue.net
+      - dc3-1.router.nl.coloclue.net
       - dc6-1.router.nl.coloclue.net
   frysix:
     ixp_community: 3512
@@ -142,7 +142,7 @@ ixp_map:
     ipv6_range: 2001:7f8:10f::205b:0/64
     present_on:
       - dc6-1.router.nl.coloclue.net
-      - dc5-2.router.nl.coloclue.net
+      - dc3-2.router.nl.coloclue.net
   decix:
     ixp_community: 31
     ipv4_range: 80.81.192.0/21
@@ -156,24 +156,24 @@ ixp_map:
     ipv6_range: 2001:7f8:54::/64
     bgp_local_pref: 90
     present_on:
-      - dc5-1.router.nl.coloclue.net
+      - dc3-1.router.nl.coloclue.net
   swissix:
     ixp_community: 60
     ipv4_range: 91.206.52.0/23
     ipv6_range: 2001:7f8:24::/64
     bgp_local_pref: 90
     present_on:
-      - dc5-2.router.nl.coloclue.net
+      - dc3-2.router.nl.coloclue.net
   private-eun:
     ipv4_range: 62.115.144.32/31
     ipv6_range: 2001:2000:3080:0ebc::/126
     present_on:
       - dc6-2.router.nl.coloclue.net
-  private-dc5:
+  private-dc3:
     ipv4_range: 4.68.73.168/30
     ipv6_range: 2001:1900:5:3::190/126
     present_on:
-      - dc5-1.router.nl.coloclue.net
+      - dc3-1.router.nl.coloclue.net
 
 bgp_passwords:
     AS42: DefibClearOK
