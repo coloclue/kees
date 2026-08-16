@@ -61,7 +61,7 @@ for router in ${routers}; do
     if [ "${router}" == "dc3-1.router.nl.coloclue.net" ] || [ "${router}" == "dc3-2.router.nl.coloclue.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc3.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc3.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
-    # EUNetworks specific stuff
+    # dc6 specific stuff
     elif [ "${router}" == "dc6-2.router.nl.coloclue.net" ] || [ "${router}" == "dc6-1.router.nl.coloclue.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
