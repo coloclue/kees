@@ -8,7 +8,7 @@ if [ "${1}" == '-d' -o "${1}" == '--debug' ]; then
     arguments='debug'
 fi
 
-routers='dc3-1.router.nl.coloclue.net dc3-2.router.nl.coloclue.net dc6-2.router.nl.coloclue.net dc6-1.router.nl.coloclue.net'
+routers='dc3-1.as8283.net dc3-2.as8283.net dc6-2.as8283.net dc6-1.as8283.net'
 
 . functions.sh
 
@@ -58,11 +58,11 @@ for router in ${routers}; do
     ./gentool -6 -y vars/generic.yml vars/${router}.yml vars/scrubbers.yml -t templates/via_scrubbers_afi.j2 -o ${STAGEDIR}/${router}/via_scrubbers_ipv6.conf
 
     # dc3 specific stuff
-    if [ "${router}" == "dc3-1.router.nl.coloclue.net" ] || [ "${router}" == "dc3-2.router.nl.coloclue.net" ]; then
+    if [ "${router}" == "dc3-1.as8283.net" ] || [ "${router}" == "dc3-2.as8283.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc3.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc3.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     # dc6 specific stuff
-    elif [ "${router}" == "dc6-2.router.nl.coloclue.net" ] || [ "${router}" == "dc6-1.router.nl.coloclue.net" ]; then
+    elif [ "${router}" == "dc6-2.as8283.net" ] || [ "${router}" == "dc6-1.as8283.net" ]; then
         ./gentool -4 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv4.conf
         ./gentool -6 -t templates/static_routes.j2 -y vars/statics-dc6.yml -o ${STAGEDIR}/${router}/static_routes-ipv6.conf
     fi
