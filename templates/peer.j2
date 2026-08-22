@@ -28,6 +28,7 @@ protocol bgp {{ neigh_name }} {
     };
     {% if password %}
     password "{{ password }}";
+	authentication md5;
     {% endif %}
     {% if gtsm %}
     ttl security on;
