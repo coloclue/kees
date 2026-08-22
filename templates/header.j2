@@ -25,10 +25,11 @@ define rejected_route = 7;              # bgp community 8283:7:* are reject reas
 define r_coloclue_morespecific = 1;     # A coloclue more specific 
 define r_bogon_aspath = 2;              # a Bogon ASN appeared somewhere in the AS_PATH
 define r_bogon_prefix = 3;              # The prefix is a Bogon
-define r_rpki_invalid = 4;              # The prefix is an RPKI invalid
+define r_rpki_invalid = 4;              # The prefix is an RPKI ROV invalid
 define r_unacceptable_pfxlen = 5;       # The route has an unacceptable large or small prefix length
 define r_no_irr = 6;                    # No IRR object covers the route
 define r_member_not_auth = 7;           # Coloclue member is not authorized to announce this
+define r_rpki_aspa_invalid = 8;         # The prefix is an RPKI ASPA invalid
 
 include "interfaces-{{ afi }}.conf";
 
