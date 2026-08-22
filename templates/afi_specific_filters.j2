@@ -129,6 +129,7 @@ function reject_rpki_invalid()
     }
     else {% endif %}if (roa_check(ROAS{{ afi|replace('ipv', '') }}) = ROA_INVALID) then {
         print "Reject: RPKI ROA check failed for ", net, " ", bgp_path, " protocol: ", proto;
+        bgp_large_community.add((8283, rejected_route, r_rpki_invalid));
         reject;
     }
 }

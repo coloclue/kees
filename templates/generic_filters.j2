@@ -114,10 +114,11 @@ prefix set acceptable_sizes;
 }
 
 {% if rpki.validation %}
-function is_aspa_invalid(bool is_upstream) {
+function is_aspa_invalid(bool is_upstream)
 {
     if aspa_check(ASPAS, bgp_path, is_upstream) = ASPA_INVALID then {
         print "Reject: RPKI ASPA check failed for ", net, " ", bgp_path, " protocol: ", proto;
+        bgp_large_community.add((8283, rejected_route, r_rpki_aspa_invalid ));
         reject;
     }
 }
