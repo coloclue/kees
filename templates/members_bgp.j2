@@ -20,7 +20,7 @@ template bgp members {
 {%- set profile_session_counter = loop.index -%}
 {{ "" }}
 # Begin {{ profile.comment }}
-function member_{{ profile.lid }}_{{ profile_session_counter }}_valid() {
+function member_{{ profile.lid }}_{{ profile_session_counter }}_valid() -> bool {
     {%- for item in profile.accept -%}
         {%- if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.prefix) -%}
             {%- if item.global == True %}

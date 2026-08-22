@@ -30,7 +30,7 @@ function not_ospf_export()
     accept;
 }
 
-function is_coloclue_supernet()
+function is_coloclue_supernet() -> bool
 prefix set coloclue;
 {
     coloclue = [
@@ -47,7 +47,7 @@ if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.pref
     return false;
 }
 
-function is_coloclue_more_specific()
+function is_coloclue_more_specific() -> bool
 prefix set coloclue;
 {
     coloclue = [
@@ -64,7 +64,7 @@ if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.pref
     return false;
 }
 
-function is_coloclue_beacon()
+function is_coloclue_beacon() -> bool
 {
     # Prefix must fall within one of our supernets, otherwise it cannot be a beacon.
     if (!is_coloclue_more_specific()) then return false;
@@ -79,7 +79,7 @@ if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.pref
     return false;
 }
 
-function is_bogon()
+function is_bogon() -> bool
 prefix set bogons;
 {
     bogons = [
@@ -96,7 +96,7 @@ if (afi == "ipv4" and "." in item.prefix) or (afi == "ipv6" and ":" in item.pref
     return false;
 }
 
-function is_bogon_aspath()
+function is_bogon_aspath() -> bool
 int set bogon_asns;
 {
     bogon_asns = [0, 23456, 64496..131071, 4200000000..4294967295];
@@ -106,7 +106,7 @@ int set bogon_asns;
     return false;
 }
 
-function is_acceptable_size()
+function is_acceptable_size() -> bool
 prefix set acceptable_sizes;
 {
 {%- if afi == "ipv4" %}

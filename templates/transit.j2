@@ -11,7 +11,7 @@ template bgp transit {
     };
 }
 
-function transit_import(int transit_tag)
+function transit_import(int transit_tag) -> bool
 int set bogon_asns;
 {
     # https://tools.ietf.org/html/draft-ietf-grow-bgp-gshut
